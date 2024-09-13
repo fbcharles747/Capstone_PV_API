@@ -1,4 +1,4 @@
-from typing import TypeVar,Generic
+from typing import TypeVar,Generic,Any,Dict,Optional
 from pymongo.database import Database
 
 T= TypeVar("T")
@@ -11,7 +11,7 @@ class BaseService(Generic[T]):
         return result.acknowledged
         
 
-    def read(self,lookup:dict)->T|None:
+    def read(self,lookup:Dict[str,Any])->Optional[T]:
         result=self.collection.find_one(lookup)
         if result:
             return T(**result)

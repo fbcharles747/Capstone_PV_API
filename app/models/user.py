@@ -1,7 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel,EmailStr
 
 class User(BaseModel):
-    email:str
+    email:EmailStr
     password:str|None=None
-    api_key:str|None=None
+    api_key:str
+
+    
     
