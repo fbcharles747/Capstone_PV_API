@@ -7,9 +7,10 @@ from app.data_services.user import UserService
 
 db_uri="mongodb://user:pass@localhost:27017/"
 client=MongoClient(db_uri)
+db=client.get_database("testDB")
 
 # initialize data service
-user_data_service=UserService("users",client.get_database("testDB"))
+user_data_service=UserService("users",db)
 
 
 app=FastAPI()
