@@ -10,9 +10,9 @@ services:
     environment:
       - CONNECTION_STR=mongodb://user:pass@mongodb
 
-    # command: '/bin/bash -c "sleep 5; mongosh $$CONN_STR --eval \"show dbs;\""'
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
 
   mongodb:
     image: mongodb/mongodb-community-server
@@ -21,3 +21,9 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=user
       - MONGO_INITDB_ROOT_PASSWORD=pass
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 30s
+      start_period: 10s
+      retries: 10

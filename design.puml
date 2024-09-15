@@ -1,41 +1,55 @@
 @startuml "BaseService diagram"
 
-class BaseService <T> {
-    - collection:MongoCollection
-    + BaseService(collection_name:str,db:MongoClient)
-    + create(model:T)
-    + read():T
-    + update()
-    + delete()
+package app.data_services{
+    class BaseService <T> {
+        - collection:MongoCollection
+        + BaseService(collection_name:str,db:MongoClient)
+        + create(model:T) -> Operation_status
+        + read()->Dict[str,Any]
+        + update()
+        + delete()
+    }
+
+    class UserService{
+        - __secret_key:str
+        + UserService(secret_key:str)
+        + sign_up(email:str,password:str)
+    }
 }
 
-class UserService{
-    - __secret_key:str
-    + UserService(secret_key:str)
-    + sign_up(email:str,password:str)
-    - hash(key:str)->str
-    - encrypt(key:str)->str
-    - decrypt(key:str)->str
-    - apikey_gen()->str
+
+package app.handler{
+
+    abstract class BaseHandler{
+        + tag:str
+        + route:str
+        + app:FastAPI
+
+        + BaseHandler(tag:str,route:str,app:FastAPI)
+        + {abstract} register_path() -> None
+    }
+
+    class UserHandler{
+        - user_service:UserService
+        + apikey_handler:APIKeyHandler
+        + UserHandler(tag:str, route:str,app:FastAPI)
+        + register_path()->None
+    }
+
+
+    class APIKeyHandler{
+        - user_service:UserService
+        + APIKeyHandler(user_data_service:UserService)
+        + verify_api_key() <<throws>> HTTPException
+    }
 }
 
-abstract class BaseHandler{
-    + tag:str
-    + route:str
-    + app:FastAPI
-
-    + BaseHandler(tag:str,route:str,app:FastAPI)
-    + {abstract} register_path() -> None
-}
-
-class UserHandler{
-    - user_service:UserService
-    + UserHandler(tag:str, route:str,app:FastAPI)
-    + register_path()->None
-}
 
 BaseService <|-- UserService: extend
 UserHandler --|> BaseHandler: extend
+UserHandler o-right- APIKeyHandler:aggregate
 UserService --o UserHandler:aggregate
+UserService --o APIKeyHandler: aggregate
+
 
 @enduml

@@ -11,10 +11,8 @@ class BaseService(Generic[T]):
         return result.acknowledged
         
 
-    def read(self,lookup:Dict[str,Any])->Optional[T]:
+    def read(self,lookup:Dict[str,Any])->Optional[Dict[str,Any]]:
         result=self.collection.find_one(lookup)
-        if result:
-            return T(**result)
         return result
 
     def update(self,lookup,field_to_change)->tuple[bool,str]:

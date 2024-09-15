@@ -4,6 +4,7 @@ from app.models.user import User
 from app.models.operation_status import OperationStatus
 from fastapi import status
 from keycove import hash,encrypt,decrypt,generate_token
+from typing import Optional
 
 class UserService(BaseService[User]):
 
@@ -20,8 +21,9 @@ class UserService(BaseService[User]):
         user_api_key=generate_token()
         user=User(email=email,
                   password=hash(password),
-                  api_key=encrypt(user_api_key,self.__secret_key))
-        print("user data generated")
+                  hashed_api_key=hash(user_api_key),
+                  encrypt_api_key=encrypt(user_api_key,self.__secret_key)
+                  )
         if self.create(user):
             return OperationStatus(
                 status_code=status.HTTP_201_CREATED,
@@ -35,3 +37,19 @@ class UserService(BaseService[User]):
                 message="server error"
             )
     
+    def get_by_email(self,email:str)->Optional[User]:
+        result=self.read({"email":email})
+        if result is not None:
+            return User(**result)
+        return None
+    
+    def get_by_apikey(self,api_key:str)->Optional[User]:
+        hashed_apikey=hash(api_key)
+        result=self.read({"hashed_api_key":hashed_apikey})
+
+        if result is not None:
+            return User(**result)
+        return None
+    
+    def decrypt_API_key(self, encypt_str:str)->str:
+        return decrypt(encrypted_value=encypt_str,secret_key=self.__secret_key)
