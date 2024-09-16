@@ -18,3 +18,12 @@ class APIKeyHandler:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="API key authorization is not enable"
             )
+
+
+class JWTHandler:
+    def __init__(self,secret:str,algorithm:str,expirey_time:int) -> None:
+        self.__secret_key=secret
+        self.__algorithm=algorithm
+        self.__expire_time=expirey_time
+
+
