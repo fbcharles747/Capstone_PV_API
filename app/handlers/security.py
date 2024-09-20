@@ -1,29 +1,81 @@
-from fastapi.security import APIKeyHeader
-from fastapi import Security,HTTPException,status
+from fastapi.security import APIKeyHeader,OAuth2PasswordBearer,HTTPBearer
+from datetime import datetime,timedelta,timezone
+from fastapi import Security,Depends,HTTPException,status
+import jwt
+from jwt.exceptions import InvalidTokenError
 from app.data_services.user import UserService
+from app.models.security import Token,TokenData
+from app.models.user import User
+from typing import Optional,Annotated
+
 class APIKeyHandler:
     api_key_header=APIKeyHeader(name="x-api-key")
     def __init__(self,user_data_service:UserService):
         self.__user_service=user_data_service
 
-    def verify_api_key(self,api_key:str=Security(api_key_header))->None:
+    def verify_api_key(self,api_key:str=Security(api_key_header))->bool:
         user=self.__user_service.get_by_apikey(api_key)
-        if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid API key"
-            )
+        if user is None :
+            return False
         elif user.api_key_enable is False:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="API key authorization is not enable"
-            )
-
+            return False
+        return True
 
 class JWTHandler:
-    def __init__(self,secret:str,algorithm:str,expirey_time:int) -> None:
+    oauth2Scheme=OAuth2PasswordBearer(tokenUrl="token",auto_error=False)
+    security_scheme=HTTPBearer()
+    def __init__(self,user_data_service:UserService,secret:str,algorithm:str|None,expiry_delta:int) -> None:
         self.__secret_key=secret
         self.__algorithm=algorithm
-        self.__expire_time=expirey_time
+        self.__expire_time=expiry_delta
+        self.__user_data_service=user_data_service
 
+    def create_access_token(self, data:dict)->str:
+        to_encode=data.copy()
+        expiry=datetime.now(timezone.utc) + timedelta(minutes=self.__expire_time)
+        to_encode.update({"exp":expiry.timestamp()})
+        encoded_jwt=jwt.encode(payload=to_encode,algorithm=self.__algorithm,key=self.__secret_key)
+        return encoded_jwt
+    
+    def login_for_access_token(self, email:str,password:str)->Optional[Token]:
+        user=self.__user_data_service.login(email,password)
+        if user is not None:
+            access_token=self.create_access_token({"sub":user.email})
+            return Token(access_token=access_token,token_type="bearer")
+        return None
 
+    def decode_token(self,access_token:str)->Optional[TokenData]:
+        try: 
+            payload=jwt.decode(jwt=access_token,key=self.__secret_key,algorithms=[self.__algorithm])
+            expiration:float=payload.get("exp")
+            email:str=payload.get("sub")
+            if (email is None) or (expiration is None):
+                return None
+            return TokenData(email=email,expiration_timestamp=expiration)
+        except InvalidTokenError:
+            return None
+        
+    def verify_token(self, access_token:Annotated[str,Security(oauth2Scheme)])->bool:
+        token_data=self.decode_token(access_token)
+        if token_data is None:
+            return False    
+        print("successfully retrieve token data")
+        exp_datetime=datetime.fromtimestamp(timestamp=token_data.expiration_timestamp,tz=timezone.utc)
+        if exp_datetime < datetime.now(timezone.utc) or token_data.email is None:
+            return False
+        print("token expiration test ok")
+        return True
+    
+    def get_current_user(self,access_token:str)->Optional[User]:
+        # if not authenticated:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_401_UNAUTHORIZED,
+        #         detail="Invalid token"
+        #     )
+        token_data=self.decode_token(access_token)
+        print(f"token data email: {token_data.email}")
+        if token_data is None:
+            return None
+        print("retrieving the current user")
+        return self.__user_data_service.get_by_email(token_data.email)
+    

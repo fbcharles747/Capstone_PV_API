@@ -2,6 +2,7 @@ from pymongo.database import Database
 from app.data_services.base import BaseService
 from app.models.user import User
 from app.models.operation_status import OperationStatus
+from app.models.security import Token
 from fastapi import status
 from keycove import hash,encrypt,decrypt,generate_token
 from typing import Optional
@@ -53,3 +54,9 @@ class UserService(BaseService[User]):
     
     def decrypt_API_key(self, encypt_str:str)->str:
         return decrypt(encrypted_value=encypt_str,secret_key=self.__secret_key)
+    
+    def login(self,email:str,password:str)-> Optional[User]:
+        result=self.read({"email":email,"password":hash(password)})
+        if result is not None:
+            return User(**result)
+        return None

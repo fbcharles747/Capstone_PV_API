@@ -1,7 +1,8 @@
 from fastapi import FastAPI,Form,HTTPException,status,Depends
-from typing import Annotated
+from fastapi.security import OAuth2PasswordBearer
+from typing import Annotated,Optional
 from app.handlers.base import BaseHandler
-from app.handlers.security import APIKeyHandler
+from app.handlers.security import APIKeyHandler,JWTHandler
 from app.data_services.user import UserService
 from app.models.user import User
 from pydantic import EmailStr
@@ -9,10 +10,14 @@ from pydantic import EmailStr
 class UserHandler(BaseHandler):
     def __init__(self,data_service:UserService,
                  api_key_handler:APIKeyHandler,
+                 oauth_handler:JWTHandler,
+                 oauth2_scheme:OAuth2PasswordBearer,
                  tag:str,route:str,app:FastAPI):
         super().__init__(tag=tag,route=route,app=app)
         self.user_data_service=data_service
         self.api_key_handler=api_key_handler
+        self.oauth_handler=oauth_handler
+        self.oauth2_scheme=oauth2_scheme
     
     def register_routes(self):
         @self.app.get(self.route+"/{email}",tags=[self.tag],response_model=User)
@@ -33,7 +38,13 @@ class UserHandler(BaseHandler):
                                     detail=status.message)
 
         # for this endpoint, we want to make sure that the current user is active
-        @self.app.get(self.route+"/api-key/{apikey}",tags=[self.tag])
-        async def decrpt_apikey(apikey:str)->str:
-            return self.user_data_service.decrypt_API_key(apikey)
+        @self.app.get(self.route+"/me",tags=[self.tag])
+        async def get_current_user(token:Annotated[str,Depends(self.oauth2_scheme)])->str:
+            # if current_user is None:
+            #     raise HTTPException(
+            #         status_code=status.HTTP_404_NOT_FOUND,
+            #         detail="user not found"
+            #     )
+            return token
+            
         
