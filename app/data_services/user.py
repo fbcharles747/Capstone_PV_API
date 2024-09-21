@@ -52,7 +52,7 @@ class UserService(BaseService[User]):
             return User(**result)
         return None
     
-    def decrypt_API_key(self, encypt_str:str)->str:
+    def decrypt_apikey(self, encypt_str:str)->str:
         return decrypt(encrypted_value=encypt_str,secret_key=self.__secret_key)
     
     def login(self,email:str,password:str)-> Optional[User]:

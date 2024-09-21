@@ -9,11 +9,13 @@ from app.models.user import User
 from typing import Optional,Annotated
 
 class APIKeyHandler:
-    api_key_header=APIKeyHeader(name="x-api-key")
+    api_key_header=APIKeyHeader(name="x-api-key",auto_error=False)
     def __init__(self,user_data_service:UserService):
         self.__user_service=user_data_service
 
-    def verify_api_key(self,api_key:str=Security(api_key_header))->bool:
+    def verify_api_key(self,api_key:Annotated[Optional[str],Depends(api_key_header)])->bool:
+        if api_key is None:
+            return False
         user=self.__user_service.get_by_apikey(api_key)
         if user is None :
             return False
@@ -22,8 +24,7 @@ class APIKeyHandler:
         return True
 
 class JWTHandler:
-    oauth2Scheme=OAuth2PasswordBearer(tokenUrl="token",auto_error=False)
-    security_scheme=HTTPBearer()
+    oauth2_scheme=OAuth2PasswordBearer(tokenUrl="token",auto_error=False)
     def __init__(self,user_data_service:UserService,secret:str,algorithm:str|None,expiry_delta:int) -> None:
         self.__secret_key=secret
         self.__algorithm=algorithm
@@ -44,7 +45,7 @@ class JWTHandler:
             return Token(access_token=access_token,token_type="bearer")
         return None
 
-    def decode_token(self,access_token:str)->Optional[TokenData]:
+    def decode_token(self,access_token:Annotated[str,Security(oauth2_scheme)])->Optional[TokenData]:
         try: 
             payload=jwt.decode(jwt=access_token,key=self.__secret_key,algorithms=[self.__algorithm])
             expiration:float=payload.get("exp")
@@ -55,7 +56,7 @@ class JWTHandler:
         except InvalidTokenError:
             return None
         
-    def verify_token(self, access_token:Annotated[str,Security(oauth2Scheme)])->bool:
+    def verify_token(self, access_token:Annotated[str,Security(oauth2_scheme)])->bool:
         token_data=self.decode_token(access_token)
         if token_data is None:
             return False    
@@ -66,16 +67,18 @@ class JWTHandler:
         print("token expiration test ok")
         return True
     
-    def get_current_user(self,access_token:str)->Optional[User]:
-        # if not authenticated:
-        #     raise HTTPException(
-        #         status_code=status.HTTP_401_UNAUTHORIZED,
-        #         detail="Invalid token"
-        #     )
+    def get_current_user(self,access_token:Annotated[str,Security(oauth2_scheme)])->Optional[User]:
+        invalidTokenException=HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="invalid token"
+            )
+        authenticated=self.verify_token(access_token=access_token)
+        if not authenticated:
+            raise invalidTokenException
         token_data=self.decode_token(access_token)
-        print(f"token data email: {token_data.email}")
         if token_data is None:
-            return None
-        print("retrieving the current user")
+            raise invalidTokenException
         return self.__user_data_service.get_by_email(token_data.email)
+    
+    
     
