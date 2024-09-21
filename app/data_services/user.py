@@ -60,3 +60,14 @@ class UserService(BaseService[User]):
         if result is not None:
             return User(**result)
         return None
+    
+    def update_by_email(self,email:str,update_dict:dict):
+        return self.update(
+            {"email":email},
+            {"$set":update_dict}
+        )
+    
+    def toggle_apikey(self, email:str,enable:bool)->bool:
+        return self.update_by_email(email=email,update_dict={"api_key_enable":enable})
+
+    

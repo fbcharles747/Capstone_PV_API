@@ -13,6 +13,9 @@ class APIKeyHandler:
     def __init__(self,user_data_service:UserService):
         self.__user_service=user_data_service
 
+    def apikey_from_request(self,api_key:Annotated[Optional[str],Depends(api_key_header)])->Optional[str]:
+        return api_key
+    
     def verify_api_key(self,api_key:Annotated[Optional[str],Depends(api_key_header)])->bool:
         if api_key is None:
             return False
@@ -22,6 +25,17 @@ class APIKeyHandler:
         elif user.api_key_enable is False:
             return False
         return True
+    
+    def get_current_user(self,api_key:Annotated[Optional[str],Depends(api_key_header)])->Optional[User]:
+        authorization_exception=HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key"
+        )
+        authenticated=self.verify_api_key(api_key)
+        if not authenticated:
+            raise authorization_exception
+        return self.__user_service.get_by_apikey(api_key)
+
 
 class JWTHandler:
     oauth2_scheme=OAuth2PasswordBearer(tokenUrl="token",auto_error=False)
@@ -31,6 +45,9 @@ class JWTHandler:
         self.__expire_time=expiry_delta
         self.__user_data_service=user_data_service
 
+    def token_from_request(self,access_token:Annotated[Optional[str],Depends(oauth2_scheme)])->Optional[str]:
+        return access_token
+    
     def create_access_token(self, data:dict)->str:
         to_encode=data.copy()
         expiry=datetime.now(timezone.utc) + timedelta(minutes=self.__expire_time)
@@ -66,8 +83,8 @@ class JWTHandler:
             return False
         print("token expiration test ok")
         return True
-    
-    def get_current_user(self,access_token:Annotated[str,Security(oauth2_scheme)])->Optional[User]:
+    # issue: don't depends this on `token_from_request` method
+    def get_current_user(self,access_token:Annotated[str,Depends(oauth2_scheme)])->Optional[User]:
         invalidTokenException=HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="invalid token"
@@ -79,6 +96,7 @@ class JWTHandler:
         if token_data is None:
             raise invalidTokenException
         return self.__user_data_service.get_by_email(token_data.email)
+    
     
     
     

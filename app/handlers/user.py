@@ -40,5 +40,20 @@ class UserHandler(BaseHandler):
                 )
             return self.user_data_service.decrypt_apikey(user.encrypt_api_key)
         
+        @self.app.put(self.route+"/me/apikey",tags=[self.tag])
+        async def toggle_my_apikey(enable:bool,user:Annotated[User,Depends(self.oauth_handler.get_current_user)]):
+            if user is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="user not found"
+                )
+            updated=self.user_data_service.toggle_apikey(user.email,enable=enable)
+            if not updated:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="update fail"
+                )
+            return f"user apikey status change"
+        
             
         

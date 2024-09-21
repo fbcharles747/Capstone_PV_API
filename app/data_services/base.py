@@ -12,11 +12,20 @@ class BaseService(Generic[T]):
         
 
     def read(self,lookup:Dict[str,Any])->Optional[Dict[str,Any]]:
-        result=self.collection.find_one(lookup)
+        try:
+            result=self.collection.find_one(lookup)
+        except Exception as e:
+            return None
         return result
 
-    def update(self,lookup,field_to_change)->tuple[bool,str]:
-        pass
+    def update(self,lookup:dict,field_to_change:dict)->bool:
+        try:
+            result=self.collection.update_one(lookup,field_to_change)
+            if result.matched_count is 0 or result.modified_count is 0:
+                return False
+        except Exception:
+            return False
+        return True
 
     def delete(self,lookup)->tuple[bool,str]:
         pass
