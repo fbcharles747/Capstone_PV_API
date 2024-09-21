@@ -9,13 +9,12 @@ from pydantic import EmailStr
 
 class UserHandler(BaseHandler):
     def __init__(self,data_service:UserService,
-                 api_key_handler:APIKeyHandler,
+                 apikey_handler:APIKeyHandler,
                  oauth_handler:JWTHandler,
                  tag:str,route:str,app:FastAPI):
-        super().__init__(tag=tag,route=route,app=app)
+        super().__init__(tag=tag,route=route,app=app,apikey_handler=apikey_handler,oauth_handler=oauth_handler)
         self.user_data_service=data_service
-        self.api_key_handler=api_key_handler
-        self.oauth_handler=oauth_handler
+        
     
     def register_routes(self):
        
@@ -27,6 +26,7 @@ class UserHandler(BaseHandler):
             else:
                 raise HTTPException(status_code=status.status_code,
                                     detail=status.message)
+        
         @self.app.get(self.route+"/me",tags=[self.tag])
         async def get_current_user(user:Annotated[User,Depends(self.oauth_handler.get_current_user)])->User:
             return user

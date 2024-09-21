@@ -30,6 +30,8 @@ package app.handler{
         + tag:str
         + route:str
         + app:FastAPI
+        + apikey_handler:APIKeyHandler
+        + oauth_handler:JWTHandler
 
         + BaseHandler(tag:str,route:str,app:FastAPI)
         + {abstract} register_path() -> None
@@ -37,8 +39,6 @@ package app.handler{
 
     class UserHandler{
         - user_service:UserService
-        + apikey_handler:APIKeyHandler
-        + oauth_handler:JWTHandler
         + UserHandler(tag:str, route:str,app:FastAPI)
         + register_path()->None
     }
@@ -72,8 +72,8 @@ package app.handler{
 
 BaseService <|-- UserService: extend
 UserHandler --|> BaseHandler: extend
-UserHandler o-- APIKeyHandler:aggregate
-UserHandler o-- JWTHandler:aggregate
+BaseHandler o-- APIKeyHandler:aggregate
+BaseHandler o-- JWTHandler:aggregate
 UserService --o UserHandler:aggregate
 UserService --o APIKeyHandler: aggregate
 UserService --o JWTHandler:aggregate
