@@ -1,7 +1,7 @@
 
 from fastapi import FastAPI
 from abc import ABC,abstractmethod
-from security import JWTHandler, APIKeyHandler
+from app.handlers.security import JWTHandler, APIKeyHandler
 
 class BaseHandler(ABC):
     def __init__(self,tag:str,route:str,app:FastAPI,apikey_handler:APIKeyHandler,oauth_handler:JWTHandler):

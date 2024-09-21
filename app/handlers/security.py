@@ -77,11 +77,11 @@ class JWTHandler:
         token_data=self.decode_token(access_token)
         if token_data is None:
             return False    
-        print("successfully retrieve token data")
+        
         exp_datetime=datetime.fromtimestamp(timestamp=token_data.expiration_timestamp,tz=timezone.utc)
         if exp_datetime < datetime.now(timezone.utc) or token_data.email is None:
             return False
-        print("token expiration test ok")
+        
         return True
     # issue: don't depends this on `token_from_request` method
     def get_current_user(self,access_token:Annotated[str,Depends(oauth2_scheme)])->Optional[User]:
