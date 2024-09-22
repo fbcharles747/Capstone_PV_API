@@ -1,6 +1,6 @@
 from fastapi import FastAPI,Depends,HTTPException,status,Request
 from fastapi.security import OAuth2PasswordRequestForm,OAuth2PasswordBearer,APIKeyHeader
-from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from app.handlers.user import UserHandler
 from app.handlers.security import APIKeyHandler,JWTHandler
@@ -33,10 +33,17 @@ oauth_handler=JWTHandler(user_data_service=user_data_service,
                          expiry_delta=5)
 
 app=FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # initialize handler
 user_handler=UserHandler(data_service=user_data_service,
-                         api_key_handler=apikey_handler,
+                         apikey_handler=apikey_handler,
                          oauth_handler=oauth_handler,
                          tag="User",
                          route="/users",
