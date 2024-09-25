@@ -16,7 +16,7 @@ package app.data_services{
         + sign_up(email:str,password:str)->OperationStatus
         + get_by_email(email:str)->Optional[User]
         + get_by_apikey(apikey:str)->Optional[User]
-        + descrypt_apikey(apikey:str)->str
+        + decrypt_apikey(apikey:str)->str
         + login(email:str,password:str)->Optional[User]
         + toggle_apikey(email:str,enable:bool)->bool
         + update_by_email(email:str,update_dict:dict)->bool
@@ -47,7 +47,7 @@ package app.handler{
     class APIKeyHandler{
         - user_service:UserService
         + {static} api_key_header:APIKeyHeader 
-        + APIKeyHandler(user_data_service:UserService)
+        + APIKeyHandler(user_service:UserService)
         + apikey_from_request(apikey:str)->str
         + verify_api_key(api_key:str) -> bool
         + get_current_user(api_key:str)->Optional[User] <<throw>> HTTPException
@@ -57,7 +57,7 @@ package app.handler{
         - secret_key:str
         - algorithm:str
         - expire_time:int
-        - user_data_service:UserService
+        - user_service:UserService
         + {static} oauth2_scheme:OauthPasswordBearer
         + create_access_token(data:dict)->str
         + token_from_request(token:str)->str
@@ -70,13 +70,13 @@ package app.handler{
 }
 
 
-BaseService <|-- UserService: extend
-UserHandler --|> BaseHandler: extend
-BaseHandler o-- APIKeyHandler:aggregate
-BaseHandler o-- JWTHandler:aggregate
-UserService --o UserHandler:aggregate
-UserService --o APIKeyHandler: aggregate
-UserService --o JWTHandler:aggregate
+BaseService <|-- UserService: extends
+UserHandler --|> BaseHandler: extends
+BaseHandler o-- APIKeyHandler: aggregates
+BaseHandler o-- JWTHandler: aggregates
+UserService --o UserHandler: aggregates
+UserService --o APIKeyHandler: aggregates
+UserService --o JWTHandler: aggregates
 
 
 @enduml
