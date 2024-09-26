@@ -1,3 +1,4 @@
+annotated-types==0.7.0
 asttokens @ file:///home/conda/feedstock_root/build_artifacts/asttokens_1698341106958/work
 Brotli @ file:///D:/bld/brotli-split_1725267609074/work
 cached-property @ file:///home/conda/feedstock_root/build_artifacts/cached_property_1615209429212/work
@@ -39,6 +40,8 @@ psutil @ file:///D:/bld/psutil_1725737989766/work
 pure_eval @ file:///home/conda/feedstock_root/build_artifacts/pure_eval_1721585709575/work
 pvlib @ file:///home/conda/feedstock_root/build_artifacts/pvlib_1718999921349/work
 pycparser @ file:///home/conda/feedstock_root/build_artifacts/pycparser_1711811537435/work
+pydantic==2.9.2
+pydantic_core==2.23.4
 Pygments @ file:///home/conda/feedstock_root/build_artifacts/pygments_1714846767233/work
 PySocks @ file:///D:/bld/pysocks_1661604991356/work
 python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/python-dateutil_1709299778482/work

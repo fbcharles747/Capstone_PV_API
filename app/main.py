@@ -15,7 +15,6 @@ secret='Gkq3b7z8J9k8L1k9J8k3L1k9J8k3L1k9J8k3L1k9J8k='
 oauth2Scheme=OAuth2PasswordBearer(tokenUrl="token")
 # uncoment this line when running in container environment
 db_uri=os.getenv("CONNECTION_STR")
-print(db_uri)
 
 # database connection
 
