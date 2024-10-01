@@ -1,14 +1,17 @@
 from typing import TypeVar,Generic,Any,Dict,Optional
 from pymongo.database import Database
+from bson import ObjectId
 
 T= TypeVar("T")
 class BaseService(Generic[T]):
     def __init__(self,collection_name:str,db:Database):
         self.collection=db.get_collection(name=collection_name)
     
-    def create(self,model:T)->bool:
+    def create(self,model:T)->str|None:
         result=self.collection.insert_one(model.__dict__)
-        return result.acknowledged
+        if result.acknowledged:
+            return str(result.inserted_id)
+        return None
         
 
     def read(self,lookup:Dict[str,Any])->Optional[Dict[str,Any]]:
