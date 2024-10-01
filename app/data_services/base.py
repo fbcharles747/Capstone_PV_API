@@ -20,6 +20,22 @@ class BaseService(Generic[T]):
         except Exception as e:
             return None
         return result
+    
+    def read_many(self,lookup:dict)->list[dict]|None:
+        try:
+            cursor = self.collection.find(lookup)
+            result = list(cursor)
+        except Exception as e:
+            return None
+        return result if result else None
+    
+    def read_by_Id(self,id:str)->dict|None:
+        try:
+            objId=ObjectId(id)
+            result=self.collection.find_one(objId)
+        except Exception as e:
+            return None
+        return result
 
     def update(self,lookup:dict,field_to_change:dict)->bool:
         try:
