@@ -1,5 +1,6 @@
 from typing import TypeVar,Generic,Any,Dict,Optional
 from pymongo.database import Database
+from pymongo.results import UpdateResult
 from bson import ObjectId
 
 T= TypeVar("T")
@@ -40,7 +41,7 @@ class BaseService(Generic[T]):
     def update(self,lookup:dict,field_to_change:dict)->bool:
         try:
             result=self.collection.update_one(lookup,field_to_change)
-            if result.matched_count is 0 or result.modified_count is 0:
+            if result.matched_count == 0 or result.modified_count == 0:
                 return False
         except Exception:
             return False
@@ -48,3 +49,11 @@ class BaseService(Generic[T]):
 
     def delete(self,lookup)->tuple[bool,str]:
         pass
+
+    def upsert(self, filter: Dict[str, Any], update: Dict[str, Any]) -> UpdateResult:
+        try:
+            result = self.collection.update_one(filter, {"$set": update}, upsert=True)
+            return result            
+        except Exception as e:
+            print(f"Error during upsert operation: {str(e)}")
+            return None

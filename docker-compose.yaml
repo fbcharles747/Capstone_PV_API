@@ -9,6 +9,7 @@ services:
       - "8080:80"
     environment:
       - CONNECTION_STR=mongodb://user:pass@mongodb
+      - GOOGLEMAP_APIKEY=AIzaSyBF2slAi7qpMnjPkcsqkQ0R59rYN9sOnNA
 
     depends_on:
       mongodb:

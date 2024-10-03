@@ -2,27 +2,37 @@ from fastapi import FastAPI,Depends,HTTPException,status,Request
 from fastapi.security import OAuth2PasswordRequestForm,OAuth2PasswordBearer,APIKeyHeader
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
+from googlemaps.client import Client
 from app.handlers.user import UserHandler
+from app.handlers.location import LocationHandler
 from app.handlers.security import APIKeyHandler,JWTHandler
 from app.data_services.user import UserService
+from app.data_services.location import LocationService
 from app.models.security import Token
 from typing import Annotated
 import os
+from app.api_adaptor.google_map import GoogleMap_Adaptor
 
 # these are secret, need to be taken out in production
 secret='Gkq3b7z8J9k8L1k9J8k3L1k9J8k3L1k9J8k3L1k9J8k='
-# db_uri="mongodb://user:pass@localhost:27017/"
+gmap_apikey='AIzaSyBF2slAi7qpMnjPkcsqkQ0R59rYN9sOnNA'
+db_uri="mongodb://user:pass@localhost:27017/"
 oauth2Scheme=OAuth2PasswordBearer(tokenUrl="token")
 # uncoment this line when running in container environment
-db_uri=os.getenv("CONNECTION_STR")
+# db_uri=os.getenv("CONNECTION_STR")
 
 # database connection
 
 client=MongoClient(db_uri)
 db=client.get_database("testDB")
+gmap_client=Client(key=gmap_apikey)
+
+# api adaptor
+gmap_adaptor=GoogleMap_Adaptor(gmap_client)
 
 # initialize data service
 user_data_service=UserService(secret,"users",db)
+location_service=LocationService(collection_name="locations",db=db,gmap_adaptor=gmap_adaptor)
 
 # initialize security handler
 apikey_handler=APIKeyHandler(user_data_service)
@@ -47,6 +57,16 @@ user_handler=UserHandler(data_service=user_data_service,
                          tag="User",
                          route="/users",
                          app=app)
+
+location_handler=LocationHandler(
+    data_service=location_service,
+    apikey_handler=apikey_handler,
+    oauth_handler=oauth_handler,
+    tag="Location",
+    route="/locations",
+    app=app
+)
+
 
 @app.get("/")
 async def root():
@@ -76,6 +96,7 @@ async def test_auth(authenticated:Annotated[bool,Depends(oauth_handler.verify_to
 
 # register pathes of each handler
 user_handler.register_routes()
+location_handler.register_routes()
 
 
 
