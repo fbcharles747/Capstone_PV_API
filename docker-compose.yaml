@@ -8,8 +8,10 @@ services:
     ports:
       - "8080:80"
     environment:
+      - SECRET_KEY=Gkq3b7z8J9k8L1k9J8k3L1k9J8k3L1k9J8k3L1k9J8k=
       - CONNECTION_STR=mongodb://user:pass@mongodb
       - GOOGLEMAP_APIKEY=AIzaSyBF2slAi7qpMnjPkcsqkQ0R59rYN9sOnNA
+      - OPENWEATHER_APIKEY=8bcf71b09bb730ee178c4d36c09206c1
 
     depends_on:
       mongodb:

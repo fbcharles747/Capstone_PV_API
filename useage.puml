@@ -1,0 +1,46 @@
+@startuml login_session_usecase
+
+participant API
+database mongodb
+participant Google_API
+participant OpenWeather_API
+participant Solargis_API
+
+->API: Sign up
+    API --> mongodb++:create user
+    mongodb -->API--: user created
+
+->API++#LightBlue:Login session
+    API --> mongodb++:get user by email and password
+    mongodb-->API--
+
+    -> API: update location with longitude and latitude
+        API-->API++ #SandyBrown:upsert location
+            API --> Google_API++:load altitude
+            Google_API-->API--:coordinate altitude
+
+            API --> Google_API++:load timezone
+            Google_API-->API--:coordinate timezone
+            API --> mongodb++:insert location
+            mongodb-->API--
+        API-->API--:location update finish
+
+    ->API:get current weather
+        API->API++ #Orchid:get current weather
+            API-->mongodb++:load user configured location
+            mongodb-->API--:location
+            API --> OpenWeather_API++:load wind speed and temperature
+            OpenWeather_API-->API--
+            API --> Solargis_API++:load irradiance data
+            Solargis_API --> API--
+        <--API--: return current weather and tmy irradiance
+    
+
+
+
+
+<-API--:session expire
+
+
+
+@enduml

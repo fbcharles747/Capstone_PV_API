@@ -1,5 +1,6 @@
 from pydantic import BaseModel,Field
 from typing import Annotated
+from datetime import datetime
 
 class Weather_Data(BaseModel):
     # General weather data
@@ -18,10 +19,9 @@ class Weather_Data(BaseModel):
 
     # Solar Irradiance Data
     ghi:float
-    ebh:float
     dni:float
     dhi:float
-    cloud_opacity:float
+    irradiance_time_stamp:datetime
 
     def __init__(self,**kwarg):
         super().__init__(**kwarg)

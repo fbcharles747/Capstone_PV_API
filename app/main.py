@@ -16,15 +16,16 @@ from app.api_adaptor.open_weather_map import OpenWeather_Adaptor
 from app.api_adaptor.solcast_api import Solcast_Adaptor
 
 # these are secret, need to be taken out in production
-secret='Gkq3b7z8J9k8L1k9J8k3L1k9J8k3L1k9J8k3L1k9J8k='
-gmap_apikey='AIzaSyBF2slAi7qpMnjPkcsqkQ0R59rYN9sOnNA'
-opweather_apikey='8bcf71b09bb730ee178c4d36c09206c1'
-solcast_apikey='RmgJvrtEEwUTQp4eGIshBNuy2VK05gpv'
-db_uri="mongodb://user:pass@localhost:27017/"
+# secret='Gkq3b7z8J9k8L1k9J8k3L1k9J8k3L1k9J8k3L1k9J8k='
+# gmap_apikey='AIzaSyBF2slAi7qpMnjPkcsqkQ0R59rYN9sOnNA'
+# opweather_apikey='8bcf71b09bb730ee178c4d36c09206c1'
+# db_uri="mongodb://user:pass@localhost:27017/"
 oauth2Scheme=OAuth2PasswordBearer(tokenUrl="token")
 # uncoment this line when running in container environment
-# db_uri=os.getenv("CONNECTION_STR")
-
+db_uri=os.getenv("CONNECTION_STR")
+gmap_apikey=os.getenv("GOOGLEMAP_APIKEY")
+opweather_apikey=os.getenv("OPENWEATHER_APIKEY")
+secret=os.getenv("SECRET_KEY")
 # database connection
 
 client=MongoClient(db_uri)
@@ -34,14 +35,12 @@ gmap_client=Client(key=gmap_apikey)
 # api adaptor
 gmap_adaptor=GoogleMap_Adaptor(gmap_client)
 opweather_adaptor=OpenWeather_Adaptor(apikey=opweather_apikey)
-solcast_adaptor=Solcast_Adaptor(apikey=solcast_apikey)
 
 # initialize data service
 user_data_service=UserService(secret,"users",db)
 location_service=LocationService(collection_name="locations",db=db,
                                  gmap_adaptor=gmap_adaptor,
-                                 open_weather_adaptor=opweather_adaptor,
-                                 solcast_adaptor=solcast_adaptor)
+                                 open_weather_adaptor=opweather_adaptor)
 
 # initialize security handler
 apikey_handler=APIKeyHandler(user_data_service)

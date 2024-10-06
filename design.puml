@@ -21,6 +21,36 @@ package app.data_services{
         + toggle_apikey(email:str,enable:bool)->bool
         + update_by_email(email:str,update_dict:dict)->bool
     }
+
+    class LocationService {
+        - __gmap_adaptor: GoogleMap_Adaptor
+        - __opweather_adptor: OpenWeather_Adaptor
+        - __solcast_adaptor: Solcast_Adaptor
+        
+        + upsert_location(latitude: float, longitude: float, user_email: str) -> bool
+        + get_location_by_UserEmail(email: str) -> LocationModel | None
+        + get_current_weather(latitude: float, longitude: float) -> Weather_Data | None
+    }
+}
+
+package app.api_adaptor{
+
+    
+    class GoogleMap_Adaptor{
+        - __client:Client
+        + get_timezone(latitude: float, longitude: float) -> str
+        + get_altitude(latitude: float, longitude: float) -> float
+    }
+
+    class OpenWeather_Adaptor{
+        - __api_key:str
+        + get_current_weather(latitude: float, longitude: float) -> tuple[OpenWeather_General,OpenWeather_Wind]
+    }
+
+    ' styling, these classes don't have relationship
+    GoogleMap_Adaptor -[hidden]- OpenWeather_Adaptor
+
+
 }
 
 
@@ -37,11 +67,19 @@ package app.handler{
         + {abstract} register_path() -> None
     }
 
+    class LocationHandler{
+        - location_service:LocationService
+        + LocationHandler(tag:str, route:str,app:FastAPI)
+        + register_path()->None
+    }
+
     class UserHandler{
         - user_service:UserService
         + UserHandler(tag:str, route:str,app:FastAPI)
         + register_path()->None
     }
+
+    
 
 
     class APIKeyHandler{
@@ -71,12 +109,26 @@ package app.handler{
 
 
 BaseService <|-- UserService: extends
+BaseService <|-- LocationService:extends
 UserHandler --|> BaseHandler: extends
-BaseHandler o-- APIKeyHandler: aggregates
-BaseHandler o-- JWTHandler: aggregates
+LocationHandler --|>BaseHandler: extends
+
+
+' service to handler
 UserService --o UserHandler: aggregates
+LocationService --o LocationHandler: aggregate
+
+' security features
 UserService --o APIKeyHandler: aggregates
 UserService --o JWTHandler: aggregates
+BaseHandler o-- APIKeyHandler: aggregates
+BaseHandler o-- JWTHandler: aggregates
+
+
+' adaptor to service
+GoogleMap_Adaptor -right-o LocationService: aggregates
+OpenWeather_Adaptor -right-o LocationService: aggregates
+
 
 
 @enduml

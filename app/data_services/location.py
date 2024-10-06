@@ -2,6 +2,7 @@ from app.data_services.base import BaseService
 from app.api_adaptor.google_map import GoogleMap_Adaptor
 from app.api_adaptor.open_weather_map import OpenWeather_Adaptor
 from app.api_adaptor.solcast_api import Solcast_Adaptor
+from app.api_adaptor.pvlib_util import get_current_irradiance_tmy
 from app.models.location import LocationModel
 from app.api_adaptor.aggregate_data import Weather_Data
 from pymongo.database import Database
@@ -10,12 +11,10 @@ from pymongo.database import Database
 class LocationService(BaseService):
     def __init__(self ,collection_name: str, db: Database,
                  gmap_adaptor:GoogleMap_Adaptor,
-                 open_weather_adaptor:OpenWeather_Adaptor,
-                 solcast_adaptor:Solcast_Adaptor):
+                 open_weather_adaptor:OpenWeather_Adaptor):
         super().__init__(collection_name, db)
         self.__gmap_adaptor=gmap_adaptor
         self.__opweather_adptor=open_weather_adaptor
-        self.__solcast_adptor=solcast_adaptor
 
     def upsert_location(self,latitude:float,longitude:float, user_email:str)->bool:
         tz=self.__gmap_adaptor.get_timezone(latitude=latitude,longitude=longitude)
@@ -32,7 +31,7 @@ class LocationService(BaseService):
     
     def get_current_weather(self,latitude:float,longitude)->Weather_Data|None:
         general,wind=self.__opweather_adptor.get_currentWeather(latitude,longitude)
-        irradiance=self.__solcast_adptor.get_current_irradiance(latitude,longitude)
+        irradiance=get_current_irradiance_tmy(latitude=latitude,longitude=longitude)
         if irradiance is None:
             print(f"Not able to get irradiance data")
             return None
@@ -43,6 +42,5 @@ class LocationService(BaseService):
             print(f"not able to get temperature data in general")
             return None
         
-        
-        return Weather_Data(**general.__dict__,**wind.to_dict(),**irradiance.__dict__)
+        return Weather_Data(**general.__dict__,**wind.to_dict(),**irradiance.to_dict_irradiance())
 
