@@ -60,7 +60,13 @@ class LocationHandler(BaseHandler):
             return location
         
         @self.app.get(f'/configured-location/weather',tags=[self.tag])
-        async def get_current_weather(user:Annotated[User,Depends(self.oauth_handler.get_current_user)])->Weather_Data:
+        async def get_current_weather(
+            token:Annotated[str|None,Depends(self.oauth_handler.token_from_request)],
+            apikey:Annotated[str|None,Depends(self.apikey_handler.apikey_from_request)]
+        )->Weather_Data:
+            
+            user=get_user(token=token,apikey=apikey)
+            
             location=self.__location_service.get_location_by_UserEmail(user.email)
             if location is None:
                 raise HTTPException(
