@@ -25,7 +25,6 @@ package app.data_services{
     class LocationService {
         - __gmap_adaptor: GoogleMap_Adaptor
         - __opweather_adptor: OpenWeather_Adaptor
-        - __solcast_adaptor: Solcast_Adaptor
         
         + upsert_location(latitude: float, longitude: float, user_email: str) -> bool
         + get_location_by_UserEmail(email: str) -> LocationModel | None

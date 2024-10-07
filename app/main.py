@@ -13,7 +13,7 @@ from typing import Annotated
 import os
 from app.api_adaptor.google_map import GoogleMap_Adaptor
 from app.api_adaptor.open_weather_map import OpenWeather_Adaptor
-from app.api_adaptor.solcast_api import Solcast_Adaptor
+from app.constant.mongo_collection import Collections
 
 # these are secret, need to be taken out in production
 # secret='Gkq3b7z8J9k8L1k9J8k3L1k9J8k3L1k9J8k3L1k9J8k='
@@ -37,10 +37,13 @@ gmap_adaptor=GoogleMap_Adaptor(gmap_client)
 opweather_adaptor=OpenWeather_Adaptor(apikey=opweather_apikey)
 
 # initialize data service
-user_data_service=UserService(secret,"users",db)
+user_data_service=UserService(secret_key=secret,
+                              collection_name=Collections.USER_COLLECTION.value,
+                              db=db)
 location_service=LocationService(collection_name="locations",db=db,
                                  gmap_adaptor=gmap_adaptor,
                                  open_weather_adaptor=opweather_adaptor)
+
 
 # initialize security handler
 apikey_handler=APIKeyHandler(user_data_service)
