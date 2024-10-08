@@ -11,10 +11,12 @@ from pymongo.database import Database
 class LocationService(BaseService):
     def __init__(self ,collection_name: str, db: Database,
                  gmap_adaptor:GoogleMap_Adaptor,
-                 open_weather_adaptor:OpenWeather_Adaptor):
+                 open_weather_adaptor:OpenWeather_Adaptor,
+                 solcast_adaptor:Solcast_Adaptor):
         super().__init__(collection_name, db)
         self.__gmap_adaptor=gmap_adaptor
         self.__opweather_adptor=open_weather_adaptor
+        self.__solcast_adaptor=solcast_adaptor
 
     def upsert_location(self,latitude:float,longitude:float, user_email:str)->bool:
         tz=self.__gmap_adaptor.get_timezone(latitude=latitude,longitude=longitude)
@@ -31,7 +33,7 @@ class LocationService(BaseService):
     
     def get_current_weather(self,latitude:float,longitude)->Weather_Data|None:
         general,wind=self.__opweather_adptor.get_currentWeather(latitude,longitude)
-        irradiance=get_current_irradiance_tmy(latitude=latitude,longitude=longitude)
+        irradiance=self.__solcast_adaptor.get_current_irradiance(latitude=latitude,longitude=longitude)
         if irradiance is None:
             print(f"Not able to get irradiance data")
             return None

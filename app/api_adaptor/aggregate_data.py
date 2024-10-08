@@ -21,7 +21,7 @@ class Weather_Data(BaseModel):
     ghi:float
     dni:float
     dhi:float
-    irradiance_time_stamp:datetime
+    irradiance_timestamp:datetime
 
     def __init__(self,**kwarg):
         super().__init__(**kwarg)
