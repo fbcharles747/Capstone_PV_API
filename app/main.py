@@ -13,6 +13,7 @@ from typing import Annotated
 import os
 from app.api_adaptor.google_map import GoogleMap_Adaptor
 from app.api_adaptor.open_weather_map import OpenWeather_Adaptor
+from app.api_adaptor.solcast_api import Solcast_Adaptor
 from app.constant.mongo_collection import Collections
 
 # these are secret, need to be taken out in production
