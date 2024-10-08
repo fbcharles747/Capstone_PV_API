@@ -7,13 +7,9 @@ import requests
 
 class Solcast_Irradiance(BaseModel):
     ghi:float
-    ebh:float
     dni:float
     dhi:float
-    cloud_opacity:float
-    # period_end:Timestamp|None
-    # diff_from_now:Timedelta|None
-    period:str|None
+    period_end:datetime|None
 
     def __init__(self,**kwarg):
         super().__init__(**kwarg)
@@ -21,10 +17,9 @@ class Solcast_Irradiance(BaseModel):
     def to_dict_irradiance(self)->dict:
         result={
             "ghi":self.ghi,
-            "ebh":self.ebh,
             "dni":self.dni,
             "dhi":self.dhi,
-            "cloud_opacity":self.cloud_opacity
+            "irradiance_timestamp":self.period_end
         }
 
         return result
@@ -38,13 +33,15 @@ class Solcast_Adaptor:
 
     def get_estimated_actuals(self,latitude:float,longitude:float)->pd.DataFrame|None:
         try:
-            response=requests.get(f"https://api.solcast.com.au/world_radiation/estimated_actuals",
+            response=requests.get(f"https://api.solcast.com.au/data/live/radiation_and_weather",
                                   params={
                                       "api_key":self.__apikey,
                                       "latitude": latitude,
                                       "longitude":longitude,
                                       "hours":1,
-                                      "format":'json'
+                                      "format":'json',
+                                      "output_parameters":['dni','ghi','dhi'],
+                                      "period":"PT15M"
                                   })
             response.raise_for_status()
             result=response.json()

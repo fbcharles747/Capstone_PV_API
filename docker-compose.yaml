@@ -12,7 +12,9 @@ services:
       - CONNECTION_STR=mongodb://user:pass@mongodb
       - GOOGLEMAP_APIKEY=AIzaSyBF2slAi7qpMnjPkcsqkQ0R59rYN9sOnNA
       - OPENWEATHER_APIKEY=8bcf71b09bb730ee178c4d36c09206c1
-
+      - SOLCAST_APIKEY=RmgJvrtEEwUTQp4eGIshBNuy2VK05gpv
+    volumes:
+      - ./app:/code/app
     depends_on:
       mongodb:
         condition: service_healthy
@@ -24,9 +26,16 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=user
       - MONGO_INITDB_ROOT_PASSWORD=pass
+
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 30s
       start_period: 10s
       retries: 10
+
+    volumes:
+      - testDB:/data/db
+
+volumes:
+  testDB:
