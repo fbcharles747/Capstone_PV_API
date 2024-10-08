@@ -25,6 +25,7 @@ oauth2Scheme=OAuth2PasswordBearer(tokenUrl="token")
 db_uri=os.getenv("CONNECTION_STR")
 gmap_apikey=os.getenv("GOOGLEMAP_APIKEY")
 opweather_apikey=os.getenv("OPENWEATHER_APIKEY")
+solcast_apikey=os.getenv("SOLCAST_APIKEY")
 secret=os.getenv("SECRET_KEY")
 # database connection
 
@@ -35,12 +36,14 @@ gmap_client=Client(key=gmap_apikey)
 # api adaptor
 gmap_adaptor=GoogleMap_Adaptor(gmap_client)
 opweather_adaptor=OpenWeather_Adaptor(apikey=opweather_apikey)
-
+solcast_adaptor=Solcast_Adaptor(apikey=solcast_apikey)
 # initialize data service
 user_data_service=UserService(secret,"users",db)
 location_service=LocationService(collection_name="locations",db=db,
                                  gmap_adaptor=gmap_adaptor,
-                                 open_weather_adaptor=opweather_adaptor)
+                                 open_weather_adaptor=opweather_adaptor,
+                                 solcast_adaptor=solcast_adaptor)
+
 
 # initialize security handler
 apikey_handler=APIKeyHandler(user_data_service)
