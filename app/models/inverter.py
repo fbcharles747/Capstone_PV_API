@@ -3,8 +3,7 @@ from typing import Annotated
 from fastapi import Body
 
 class InverterModel(BaseModel):
-    user_email:str=None
-    Name: Annotated[str, Body(description="Name of the inverter")]
+    Name: Annotated[str, Body(description="Name of the inverter")]="No Name"
     Vac: Annotated[float, Body(description="Nominal AC voltage (V)")]
     Paco: Annotated[float, Body(description="Maximum AC power (W)")]
     Pdco: Annotated[float, Body(description="Maximum DC power (W)")]

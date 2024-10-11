@@ -6,8 +6,11 @@ from googlemaps.client import Client
 from app.handlers.user import UserHandler
 from app.handlers.location import LocationHandler
 from app.handlers.security import APIKeyHandler,JWTHandler
+from app.handlers.device import DeviceHandler
 from app.data_services.user import UserService
 from app.data_services.location import LocationService
+from app.data_services.inverter import InverterService
+from app.data_services.solar_module import SolarModuleService
 from app.models.security import Token
 from typing import Annotated
 import os
@@ -42,11 +45,22 @@ solcast_adaptor=Solcast_Adaptor(apikey=solcast_apikey)
 user_data_service=UserService(secret_key=secret,
                               collection_name=Collections.USER_COLLECTION.value,
                               db=db)
-location_service=LocationService(collection_name="locations",db=db,
+location_service=LocationService(collection_name=Collections.LOCATION_COLLECTION.value,db=db,
                                  gmap_adaptor=gmap_adaptor,
                                  open_weather_adaptor=opweather_adaptor,
                                  solcast_adaptor=solcast_adaptor)
 
+inverter_service=InverterService(
+    collection_name=Collections.INVERTER_COLLECTION.value,
+    db=db,
+    default_inverter=None
+)
+
+module_service=SolarModuleService(
+    collection_name=Collections.SOLARMOD_COLLECTION.value,
+    db=db,
+    default_solar_module=None
+)
 
 
 # initialize security handler
@@ -54,7 +68,7 @@ apikey_handler=APIKeyHandler(user_data_service)
 oauth_handler=JWTHandler(user_data_service=user_data_service,
                          secret=secret,
                          algorithm="HS256",
-                         expiry_delta=5)
+                         expiry_delta=15)
 
 app=FastAPI()
 app.add_middleware(
@@ -80,6 +94,17 @@ location_handler=LocationHandler(
     oauth_handler=oauth_handler,
     tag="Location",
     route="/locations",
+    app=app
+)
+
+device_handler=DeviceHandler(
+    inverter_service=inverter_service,
+    module_service=module_service,
+    user_service=user_data_service,
+    apikey_handler=apikey_handler,
+    oauth_handler=oauth_handler,
+    tag="Devices",
+    route="/devices",
     app=app
 )
 
@@ -113,6 +138,7 @@ async def test_auth(authenticated:Annotated[bool,Depends(oauth_handler.verify_to
 # register pathes of each handler
 user_handler.register_routes()
 location_handler.register_routes()
+device_handler.register_routes()
 
 
 

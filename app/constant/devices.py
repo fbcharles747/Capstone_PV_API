@@ -21,7 +21,7 @@ DEFAULT_INVERTER = {
 DEFAULT_MODULE = {
     'Name': 'Sunpreme_Inc__SNPM_GxB_510',  # Name of the solar module
     'Technology': 'Thin Film',               # Type of technology used in the solar module
-    'Bifacial': 'N',                         # Indicates if the module is bifacial (Y/N)
+    'BIPV': 'N',                         # Indicates if the module is bifacial (Y/N)
     'STC': 509.97,                          # Standard Test Conditions power output (W)
     'PTC': 479.6,                           # PTC (PVUSA Test Conditions) power output (W)
     'A_c': 2.591,                           # Area of the solar panel (m²)
