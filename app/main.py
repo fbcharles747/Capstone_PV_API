@@ -71,6 +71,7 @@ user_handler=UserHandler(data_service=user_data_service,
 
 location_handler=LocationHandler(
     data_service=location_service,
+    user_service=user_data_service,
     apikey_handler=apikey_handler,
     oauth_handler=oauth_handler,
     tag="Location",
