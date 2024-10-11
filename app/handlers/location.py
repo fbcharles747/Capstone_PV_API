@@ -1,5 +1,6 @@
 from app.handlers.base import BaseHandler
 from app.data_services.location import LocationService
+from app.data_services.user import UserService
 from app.handlers.security import APIKeyHandler,JWTHandler
 from app.models.user import User
 from app.models.location import LocationModel
@@ -9,11 +10,13 @@ from app.api_adaptor.aggregate_data import Weather_Data
 
 class LocationHandler(BaseHandler):
     def __init__(self,data_service:LocationService,
+                 user_service:UserService,
                  apikey_handler:APIKeyHandler,
                  oauth_handler:JWTHandler,
                  tag:str,route:str,app:FastAPI):
         super().__init__(tag=tag,route=route,app=app,apikey_handler=apikey_handler,oauth_handler=oauth_handler)
         self.__location_service=data_service
+        self.__user_service=user_service
 
     def register_routes(self):
 
@@ -32,9 +35,21 @@ class LocationHandler(BaseHandler):
             return user
         
         @self.app.post(self.route,tags=[self.tag])
-        async def upsert_location(latitude:float,longitude:float,user:Annotated[User,Depends(self.oauth_handler.get_current_user)]):
+        async def upsert_location(latitude:float,longitude:float,
+                                  user:Annotated[User,Depends(self.oauth_handler.get_current_user)]):
             
-            updated=self.__location_service.upsert_location(latitude=latitude,longitude=longitude,user_email=user.email)
+            if user.location_Id is None:
+                locationId=self.__location_service.create_location(latitude=latitude,longitude=longitude)
+                if locationId is not None:
+                    self.__user_service.update_locationId(user_email=user.email,locationId=locationId)
+                    return "user location is created"
+                else:
+                    raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="location creation fail"
+                )
+
+            updated=self.__location_service.update_location(latitude=latitude,longitude=longitude,locationId=user.location_Id)
             
             if not updated:
                 raise HTTPException(
@@ -51,7 +66,7 @@ class LocationHandler(BaseHandler):
             
             user=get_user(token=token,apikey=apikey)
 
-            location=self.__location_service.get_location_by_UserEmail(user.email)
+            location=self.__location_service.get_location_ById(user.location_Id)
             if location is None:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -67,7 +82,7 @@ class LocationHandler(BaseHandler):
             
             user=get_user(token=token,apikey=apikey)
             
-            location=self.__location_service.get_location_by_UserEmail(user.email)
+            location=self.__location_service.get_location_ById(user.location_Id)
             if location is None:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,

@@ -67,6 +67,10 @@ class UserService(BaseService[User]):
             {"$set":update_dict}
         )
     
+    def update_locationId(self,user_email:str,locationId:str):
+        return self.update_by_email(user_email,{'location_Id':locationId})
+    
+    
     def toggle_apikey(self, email:str,enable:bool)->bool:
         return self.update_by_email(email=email,update_dict={"api_key_enable":enable})
 

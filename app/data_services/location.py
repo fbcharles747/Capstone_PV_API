@@ -4,11 +4,12 @@ from app.api_adaptor.open_weather_map import OpenWeather_Adaptor
 from app.api_adaptor.solcast_api import Solcast_Adaptor
 from app.api_adaptor.pvlib_util import get_current_irradiance_tmy
 from app.models.location import LocationModel
+from app.models.user import User
 from app.api_adaptor.aggregate_data import Weather_Data
 from pymongo.database import Database
 
 
-class LocationService(BaseService):
+class LocationService(BaseService[LocationModel]):
     def __init__(self ,collection_name: str, db: Database,
                  gmap_adaptor:GoogleMap_Adaptor,
                  open_weather_adaptor:OpenWeather_Adaptor,
@@ -17,19 +18,31 @@ class LocationService(BaseService):
         self.__gmap_adaptor=gmap_adaptor
         self.__opweather_adptor=open_weather_adaptor
         self.__solcast_adaptor=solcast_adaptor
-
-    def upsert_location(self,latitude:float,longitude:float, user_email:str)->bool:
+    
+    def load_locationInfo(self,latitude:float,longitude:float)->LocationModel:
         tz=self.__gmap_adaptor.get_timezone(latitude=latitude,longitude=longitude)
         altitude=self.__gmap_adaptor.get_altitude(latitude=latitude,longitude=longitude)
-        location=LocationModel(latitude=latitude,longitude=longitude,altitude=altitude,timezone=tz.timeZoneId,user_email=user_email)
-        result=self.upsert(filter={"user_email":user_email},update=location.__dict__)
-        return result.acknowledged
+        location=LocationModel(latitude=latitude,longitude=longitude,altitude=altitude,timezone=tz.timeZoneId)
+        return location
     
-    def get_location_by_UserEmail(self,email:str)->LocationModel|None:
-        result=self.read({"user_email":email})
+    def create_location(self,latitude:float,longitude:float)->str|None:
+        location=self.load_locationInfo(latitude=latitude,longitude=longitude)
+        locationID=self.create(location)
+        return locationID
+
+    
+    def update_location(self,latitude:float,longitude:float,locationId:str)->bool:
+        location=self.load_locationInfo(latitude=latitude,longitude=longitude)
+        result=self.update_ById(locationId,location.__dict__)
+        return result
+    
+    
+    def get_location_ById(self,id:str)->LocationModel|None:
+        result=self.read_by_Id(id=id)
         if result is not None:
             return LocationModel(**result)
         return result
+
     
     def get_current_weather(self,latitude:float,longitude)->Weather_Data|None:
         general,wind=self.__opweather_adptor.get_currentWeather(latitude,longitude)
