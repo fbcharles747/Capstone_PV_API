@@ -41,17 +41,24 @@ class BaseService(Generic[T]):
     def update(self,lookup:dict,field_to_change:dict)->bool:
         try:
             result=self.collection.update_one(lookup,{'$set':field_to_change})
-            if result.matched_count == 0:
-                print("no match found")
-                return False
+            return result.acknowledged and result.matched_count>0
         except Exception as e:
             print(str(e))
             return False
-        return True
+        
     
     def update_ById(self,id:str,field_to_change:dict)->bool:
         id_instance=ObjectId(id)
         return self.update({"_id":id_instance},field_to_change=field_to_change)
 
-    def delete(self,lookup)->tuple[bool,str]:
-        pass
+    def delete(self,lookup:dict)->bool:
+        try:
+            result=self.collection.delete_one(lookup)
+            return result.acknowledged and result.deleted_count>0
+        except Exception as e:
+            print(str(e))
+            return False
+    
+    def delete_byId(self,id:str)->bool:
+        id_instance=ObjectId(id)
+        return self.delete({"_id":id_instance})

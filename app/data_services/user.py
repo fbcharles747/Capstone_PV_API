@@ -70,10 +70,10 @@ class UserService(BaseService[User]):
     def update_locationId(self,user_email:str,locationId:str)->bool:
         return self.update_by_email(user_email,{'location_Id':locationId})
     
-    def update_inverterId(self,user_email:str,inverterId:str)->bool:
+    def update_inverterId(self,user_email:str,inverterId:str|None)->bool:
         return self.update_by_email(user_email,{'inverter_Id':inverterId})
     
-    def update_moduleId(self,user_email:str,moduleId:str)->bool:
+    def update_moduleId(self,user_email:str,moduleId:str|None)->bool:
         return self.update_by_email(user_email,{'solarModule_Id':moduleId})
     
     def toggle_apikey(self, email:str,enable:bool)->bool:

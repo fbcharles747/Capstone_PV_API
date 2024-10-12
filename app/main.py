@@ -12,6 +12,9 @@ from app.data_services.location import LocationService
 from app.data_services.inverter import InverterService
 from app.data_services.solar_module import SolarModuleService
 from app.models.security import Token
+from app.models.inverter import InverterModel
+from app.models.solar_module import SolarModuleModel
+from app.constant.devices import DEFAULT_INVERTER,DEFAULT_MODULE
 from typing import Annotated
 import os
 from app.api_adaptor.google_map import GoogleMap_Adaptor
@@ -53,13 +56,13 @@ location_service=LocationService(collection_name=Collections.LOCATION_COLLECTION
 inverter_service=InverterService(
     collection_name=Collections.INVERTER_COLLECTION.value,
     db=db,
-    default_inverter=None
+    default_inverter=InverterModel(**DEFAULT_INVERTER)
 )
 
 module_service=SolarModuleService(
     collection_name=Collections.SOLARMOD_COLLECTION.value,
     db=db,
-    default_solar_module=None
+    default_solar_module=SolarModuleModel(**DEFAULT_MODULE)
 )
 
 
