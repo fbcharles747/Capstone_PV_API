@@ -66,7 +66,7 @@ class DeviceHandler(BaseHandler):
         
             
 
-        @self.app.get(f'/configured-inverter', tags=[self.tag])
+        @self.app.get(f'{self.route}/configured-inverter', tags=[self.tag])
         async def get_configured_inverter(
             token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
             apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)]
@@ -82,7 +82,7 @@ class DeviceHandler(BaseHandler):
                 )
             return device
         
-        @self.app.delete(f'/configured-configured-inverter',tags=[self.tag])
+        @self.app.delete(f'{self.route}/configured-inverter',tags=[self.tag])
         async def delete_configured_inverter(
             user: Annotated[User, Depends(self.oauth_handler.get_current_user)]
         ):
@@ -120,7 +120,7 @@ class DeviceHandler(BaseHandler):
                 )
             return "User module is updated"
         
-        @self.app.get(f'/configured-solar_modules', tags=[self.tag])
+        @self.app.get(f'{self.route}/configured-solar_modules', tags=[self.tag])
         async def get_configured_inverter(
             token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
             apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)]
@@ -136,7 +136,7 @@ class DeviceHandler(BaseHandler):
                 )
             return device
         
-        @self.app.delete(f'/configured-solar_modules',tags=[self.tag])
+        @self.app.delete(f'{self.route}/configured-solar_modules',tags=[self.tag])
         async def delete_module(
             user: Annotated[User, Depends(self.oauth_handler.get_current_user)]
         ):
