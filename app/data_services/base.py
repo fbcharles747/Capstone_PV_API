@@ -1,15 +1,16 @@
 from typing import TypeVar,Generic,Any,Dict,Optional
+from pydantic import BaseModel
 from pymongo.database import Database
 from pymongo.results import UpdateResult
 from bson.objectid import ObjectId
 
-T= TypeVar("T")
+T= TypeVar("T",bound=BaseModel)
 class BaseService(Generic[T]):
     def __init__(self,collection_name:str,db:Database):
         self.collection=db.get_collection(name=collection_name)
     
     def create(self,model:T)->str|None:
-        result=self.collection.insert_one(model.__dict__)
+        result=self.collection.insert_one(model.model_dump())
         if result.acknowledged:
             return str(result.inserted_id)
         return None
