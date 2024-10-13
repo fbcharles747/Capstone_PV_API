@@ -17,10 +17,8 @@ class DeviceHandler(BaseHandler):
                  user_service: UserService,
                  apikey_handler: APIKeyHandler,
                  oauth_handler: JWTHandler,
-                 tag: str, 
-                 route: str, 
                  app: FastAPI):
-        super().__init__(tag=tag, route=route, app=app, apikey_handler=apikey_handler, oauth_handler=oauth_handler)
+        super().__init__(tag="Device", route='/devices', app=app, apikey_handler=apikey_handler, oauth_handler=oauth_handler)
         self.__inverter_service=inverter_service
         self.__module_service=module_service
         self.__user_service = user_service
@@ -86,14 +84,14 @@ class DeviceHandler(BaseHandler):
         async def delete_configured_inverter(
             user: Annotated[User, Depends(self.oauth_handler.get_current_user)]
         ):
-            if user.inverter_Id is not None:    
+            if user.inverter_Id is not None:  
+                self.__user_service.update_inverterId(user_email=user.email,inverterId=None)  
                 deleted=self.__inverter_service.delete_byId(user.inverter_Id)
                 if not deleted:
                     raise HTTPException(
                         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                         detail="inverter deletion failed"
                     )
-                self.__user_service.update_inverterId(user_email=user.email,inverter_Id=None)
                 return "inverter is deleted"
             return "user have no configured inverter"
         
@@ -141,13 +139,14 @@ class DeviceHandler(BaseHandler):
             user: Annotated[User, Depends(self.oauth_handler.get_current_user)]
         ):
             if user.solarModule_Id is not None:
+                self.__user_service.update_moduleId(user_email=user.email,moduleId=None)
                 deleted=self.__module_service.delete_byId(user.solarModule_Id)
                 if not deleted:
                         raise HTTPException(
                             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="inverter deletion failed"
                         )
-                self.__user_service.update_moduleId(user_email=user.email,moduleId=None)
+                
                 return "user module is deleted"
             return "user has no configured module"
 
