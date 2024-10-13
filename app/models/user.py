@@ -9,6 +9,7 @@ class User(BaseModel):
     location_Id:str|None=None
     inverter_Id:str|None=None
     solarModule_Id:str|None=None
+    system_Id:str|None=None
     
 
     def __init__(self,**kwarg):

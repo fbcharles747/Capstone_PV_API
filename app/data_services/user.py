@@ -76,6 +76,9 @@ class UserService(BaseService[User]):
     def update_moduleId(self,user_email:str,moduleId:str|None)->bool:
         return self.update_by_email(user_email,{'solarModule_Id':moduleId})
     
+    def update_systemId(self,user_email:str,systemId:str|None)->bool:
+        return self.update_by_email(user_email,{'system_Id':systemId})
+    
     def toggle_apikey(self, email:str,enable:bool)->bool:
         return self.update_by_email(email=email,update_dict={"api_key_enable":enable})
 

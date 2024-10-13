@@ -1,6 +1,4 @@
-from typing import Any, Dict
 from pymongo.database import Database
-from pymongo.results import UpdateResult
 from app.data_services.base import BaseService
 from app.models.solar_module import SolarModuleModel
 
