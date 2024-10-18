@@ -2,7 +2,6 @@ from app.data_services.base import BaseService
 from app.api_adaptor.google_map import GoogleMap_Adaptor
 from app.api_adaptor.open_weather_map import OpenWeather_Adaptor
 from app.api_adaptor.solcast_api import Solcast_Adaptor
-from app.api_adaptor.pvlib_util import get_current_irradiance_tmy
 from app.models.location import LocationModel
 from app.models.user import User
 from app.api_adaptor.aggregate_data import Weather_Data
@@ -25,14 +24,16 @@ class LocationService(BaseService[LocationModel]):
         location=LocationModel(latitude=latitude,longitude=longitude,altitude=altitude,timezone=tz.timeZoneId)
         return location
     
-    def create_location(self,latitude:float,longitude:float)->str|None:
+    def create_location(self,latitude:float,longitude:float,name:str)->str|None:
         location=self.load_locationInfo(latitude=latitude,longitude=longitude)
+        location.name=name
         locationID=self.create(location)
         return locationID
 
     
-    def update_location(self,latitude:float,longitude:float,locationId:str)->bool:
+    def update_location(self,latitude:float,longitude:float,locationId:str,name:str)->bool:
         location=self.load_locationInfo(latitude=latitude,longitude=longitude)
+        location.name=name
         result=self.update_ById(locationId,location.__dict__)
         return result
     
