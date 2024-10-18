@@ -36,10 +36,11 @@ class LocationHandler(BaseHandler):
         
         @self.app.post(self.route,tags=[self.tag])
         async def upsert_location(latitude:float,longitude:float,
-                                  user:Annotated[User,Depends(self.oauth_handler.get_current_user)]):
+                                  user:Annotated[User,Depends(self.oauth_handler.get_current_user)],
+                                  name:str="No name"):
             
             if user.location_Id is None:
-                locationId=self.__location_service.create_location(latitude=latitude,longitude=longitude)
+                locationId=self.__location_service.create_location(latitude=latitude,longitude=longitude,name=name)
                 if locationId is not None:
                     self.__user_service.update_locationId(user_email=user.email,locationId=locationId)
                     return "user location is created"
@@ -49,7 +50,7 @@ class LocationHandler(BaseHandler):
                     detail="location creation fail"
                 )
 
-            updated=self.__location_service.update_location(latitude=latitude,longitude=longitude,locationId=user.location_Id)
+            updated=self.__location_service.update_location(latitude=latitude,longitude=longitude,locationId=user.location_Id,name=name)
             
             if not updated:
                 raise HTTPException(

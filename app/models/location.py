@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import Body
 
 class LocationModel(BaseModel):
+    name: Annotated[str,Body(description="name of the location")]="No name"
     latitude: Annotated[float, Body(description="Latitude in decimal degrees")]
     longitude: Annotated[float, Body(description="Longitude in decimal degrees")]
     altitude: Annotated[float, Body(description="Altitude in meters")]
