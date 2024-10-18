@@ -13,8 +13,8 @@ class LocationHandler(BaseHandler):
                  user_service:UserService,
                  apikey_handler:APIKeyHandler,
                  oauth_handler:JWTHandler,
-                 tag:str,route:str,app:FastAPI):
-        super().__init__(tag=tag,route=route,app=app,apikey_handler=apikey_handler,oauth_handler=oauth_handler)
+                 app:FastAPI):
+        super().__init__(tag="Location",route="/locations",app=app,apikey_handler=apikey_handler,oauth_handler=oauth_handler)
         self.__location_service=data_service
         self.__user_service=user_service
 

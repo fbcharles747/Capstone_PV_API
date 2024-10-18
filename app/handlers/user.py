@@ -11,8 +11,8 @@ class UserHandler(BaseHandler):
     def __init__(self,data_service:UserService,
                  apikey_handler:APIKeyHandler,
                  oauth_handler:JWTHandler,
-                 tag:str,route:str,app:FastAPI):
-        super().__init__(tag=tag,route=route,app=app,apikey_handler=apikey_handler,oauth_handler=oauth_handler)
+                 app:FastAPI):
+        super().__init__(tag="User",route="/users",app=app,apikey_handler=apikey_handler,oauth_handler=oauth_handler)
         self.user_data_service=data_service
         
     

@@ -7,13 +7,16 @@ from app.handlers.user import UserHandler
 from app.handlers.location import LocationHandler
 from app.handlers.security import APIKeyHandler,JWTHandler
 from app.handlers.device import DeviceHandler
+from app.handlers.system import PVSystemHandler
 from app.data_services.user import UserService
 from app.data_services.location import LocationService
 from app.data_services.inverter import InverterService
 from app.data_services.solar_module import SolarModuleService
+from app.data_services.system import PVSystemService
 from app.models.security import Token
 from app.models.inverter import InverterModel
 from app.models.solar_module import SolarModuleModel
+from app.models.system import PVSystemModel,SolarArray
 from app.constant.devices import DEFAULT_INVERTER,DEFAULT_MODULE
 from typing import Annotated
 import os
@@ -65,6 +68,18 @@ module_service=SolarModuleService(
     default_solar_module=SolarModuleModel(**DEFAULT_MODULE)
 )
 
+default_system=PVSystemModel(
+    name='default',
+    num_of_array=4,
+    array_config=SolarArray()
+)
+
+system_service=PVSystemService(
+    collection_name=Collections.PVSYSTEM_COLLECTION,
+    db=db,
+    default_pv_system=default_system
+)
+
 
 # initialize security handler
 apikey_handler=APIKeyHandler(user_data_service)
@@ -86,8 +101,6 @@ app.add_middleware(
 user_handler=UserHandler(data_service=user_data_service,
                          apikey_handler=apikey_handler,
                          oauth_handler=oauth_handler,
-                         tag="User",
-                         route="/users",
                          app=app)
 
 location_handler=LocationHandler(
@@ -95,8 +108,6 @@ location_handler=LocationHandler(
     user_service=user_data_service,
     apikey_handler=apikey_handler,
     oauth_handler=oauth_handler,
-    tag="Location",
-    route="/locations",
     app=app
 )
 
@@ -106,15 +117,21 @@ device_handler=DeviceHandler(
     user_service=user_data_service,
     apikey_handler=apikey_handler,
     oauth_handler=oauth_handler,
-    tag="Devices",
-    route="/devices",
     app=app
+)
+
+system_handler=PVSystemHandler(
+    data_service=system_service,
+    user_service=user_data_service,
+    app=app,
+    apikey_handler=apikey_handler,
+    oauth_handler=oauth_handler,
 )
 
 
 @app.get("/")
 async def root():
-    return "Hello people!"
+    return "Hello there! go to `/docs` for documentation"
 
 @app.post("/token")
 async def login_for_access_token(
@@ -142,6 +159,8 @@ async def test_auth(authenticated:Annotated[bool,Depends(oauth_handler.verify_to
 user_handler.register_routes()
 location_handler.register_routes()
 device_handler.register_routes()
+system_handler.register_routes()
+
 
 
 
