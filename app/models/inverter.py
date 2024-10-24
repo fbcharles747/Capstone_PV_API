@@ -19,6 +19,7 @@ class InverterModel(BaseModel):
     Mppt_low: Annotated[float, Body(description="Minimum MPPT DC voltage (V)")]
     Mppt_high: Annotated[float, Body(description="Maximum MPPT DC voltage (V)")]
     Name: Annotated[str, Body(description="Name of the inverter")]="No Name"
+    Efficiency:Annotated[float,Body(description="Inverter average efficiency")]=0.95
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
