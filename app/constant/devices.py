@@ -24,8 +24,8 @@ DEFAULT_MODULE = {
     'STC': 550.62,
     'PTC': 516.4,
     'A_c': 2.52,
-    'Length': None,  # NaN is represented as None in Python
-    'Width': None,   # NaN is represented as None in Python
+    'Length': 2,  
+    'Width': 2,   
     'N_s': 72,
     'I_sc_ref': 14,
     'V_oc_ref': 49.9,
