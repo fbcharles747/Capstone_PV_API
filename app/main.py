@@ -17,7 +17,9 @@ from app.models.security import Token
 from app.models.inverter import InverterModel
 from app.models.solar_module import SolarModuleModel
 from app.models.system import PVSystemModel,SolarArray
+from app.models.location import LocationModel
 from app.constant.devices import DEFAULT_INVERTER,DEFAULT_MODULE
+from app.constant.location import DEFAULT_LOCATION
 from typing import Annotated
 import os
 from app.api_adaptor.google_map import GoogleMap_Adaptor
@@ -51,7 +53,9 @@ solcast_adaptor=Solcast_Adaptor(apikey=solcast_apikey)
 user_data_service=UserService(secret_key=secret,
                               collection_name=Collections.USER_COLLECTION.value,
                               db=db)
-location_service=LocationService(collection_name=Collections.LOCATION_COLLECTION.value,db=db,
+location_service=LocationService(default_location=LocationModel(**DEFAULT_LOCATION),
+                                collection_name=Collections.LOCATION_COLLECTION.value,
+                                db=db,
                                  gmap_adaptor=gmap_adaptor,
                                  open_weather_adaptor=opweather_adaptor,
                                  solcast_adaptor=solcast_adaptor)

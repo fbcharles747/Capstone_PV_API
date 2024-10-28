@@ -9,11 +9,12 @@ from pymongo.database import Database
 
 
 class LocationService(BaseService[LocationModel]):
-    def __init__(self ,collection_name: str, db: Database,
+    def __init__(self, default_location:LocationModel,collection_name: str, db: Database,
                  gmap_adaptor:GoogleMap_Adaptor,
                  open_weather_adaptor:OpenWeather_Adaptor,
                  solcast_adaptor:Solcast_Adaptor):
         super().__init__(collection_name, db)
+        self.default=default_location
         self.__gmap_adaptor=gmap_adaptor
         self.__opweather_adptor=open_weather_adaptor
         self.__solcast_adaptor=solcast_adaptor
@@ -38,11 +39,11 @@ class LocationService(BaseService[LocationModel]):
         return result
     
     
-    def get_location_ById(self,id:str)->LocationModel|None:
+    def get_location_ById(self,id:str)->LocationModel:
         result=self.read_by_Id(id=id)
         if result is not None:
             return LocationModel(**result)
-        return result
+        return self.default
 
     
     def get_current_weather(self,latitude:float,longitude)->Weather_Data|None:
