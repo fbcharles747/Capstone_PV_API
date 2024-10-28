@@ -3,6 +3,9 @@ from app.handlers.base import BaseHandler
 from app.handlers.security import JWTHandler, APIKeyHandler
 from app.data_services.system import PVSystemService
 from app.data_services.user import UserService
+from app.data_services.location import LocationService
+from app.data_services.inverter import InverterService
+from app.data_services.solar_module import SolarModuleService
 from app.models.user import User
 from app.models.system import PVSystemModel,SolarArray
 from typing import Annotated
@@ -11,12 +14,18 @@ class PVSystemHandler(BaseHandler):
     def __init__(self,
                 data_service:PVSystemService,
                 user_service:UserService,
+                location_service:LocationService,
+                inverter_service:InverterService,
+                solarMod_service:SolarModuleService,
                  app: FastAPI, 
                  apikey_handler: APIKeyHandler, 
                  oauth_handler: JWTHandler):
         super().__init__(tag="PVSystem", route="/pv_systems", app=app, apikey_handler=apikey_handler, oauth_handler=oauth_handler)
         self.__user_service=user_service
         self.__system_service=data_service
+        self.__location_service=location_service
+        self.__inverter_service=inverter_service
+        self.__solarmodule_service=solarMod_service
 
 
     def register_routes(self):
@@ -77,6 +86,13 @@ class PVSystemHandler(BaseHandler):
                 )
             
             return "user system is updated"
+        
+        @self.app.get(f'{self.route}/run_model',tags=[self.tag])
+        async def run_model(
+            token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
+            apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)]
+        ):
+            user=get_user(token=token,apikey=apikey)
 
             
 

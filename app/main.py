@@ -125,6 +125,9 @@ device_handler=DeviceHandler(
 )
 
 system_handler=PVSystemHandler(
+    location_service=location_service,
+    inverter_service=inverter_service,
+    solarMod_service=module_service,
     data_service=system_service,
     user_service=user_data_service,
     app=app,
