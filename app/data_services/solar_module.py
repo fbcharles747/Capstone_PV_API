@@ -9,6 +9,8 @@ class SolarModuleService(BaseService[SolarModuleModel]):
         
 
     def get_solar_module(self, module_Id: str) -> SolarModuleModel:
+        if module_Id is None:
+            return self.__default
         result = self.read_by_Id(module_Id)
         if result is not None:
             return SolarModuleModel(**result)

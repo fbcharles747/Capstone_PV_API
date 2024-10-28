@@ -1,6 +1,10 @@
 from pymongo.database import Database
 from app.data_services.base import BaseService
 from app.models.system import PVSystemModel,SolarArray
+from app.models.inverter import InverterModel
+from app.models.solar_module import SolarModuleModel
+from app.models.location import LocationModel
+from app.api_adaptor.aggregate_data import Weather_Data
 
 class PVSystemService(BaseService[PVSystemModel]):
     def __init__(self, collection_name: str, db: Database, default_pv_system: PVSystemModel):
@@ -8,6 +12,9 @@ class PVSystemService(BaseService[PVSystemModel]):
         self.__default = default_pv_system
 
     def get_pv_system(self, system_Id: str) -> PVSystemModel:
+        if system_Id is None:
+            return self.__default
+        
         result = self.read_by_Id(system_Id)
         if result is not None:
             return PVSystemModel(**result)
@@ -36,11 +43,8 @@ class PVSystemService(BaseService[PVSystemModel]):
             system.array_config=arrayConfig
         return self.create(system)
     
-        
-
-
     
-    def run_pvsystem():
+    def run_model(self,location:LocationModel,weather:Weather_Data,module:SolarModuleModel,inverter:InverterModel,system:PVSystemModel):
         pass
 
 

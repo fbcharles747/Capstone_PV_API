@@ -40,6 +40,8 @@ class LocationService(BaseService[LocationModel]):
     
     
     def get_location_ById(self,id:str)->LocationModel:
+        if id is None:
+            return self.default
         result=self.read_by_Id(id=id)
         if result is not None:
             return LocationModel(**result)
