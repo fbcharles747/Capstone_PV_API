@@ -15,7 +15,8 @@ DEFAULT_INVERTER = {
     'Mppt_high': 416.0,  # Maximum MPPT DC voltage (V)
     'CEC_Date': None,  # CEC date (if applicable, None indicates missing data)
     'CEC_Type': 'Utility Interactive',  # Type of CEC classification
-    'Name': 'ABB__UNO_2_5_I_OUTD_S_US__277V_'  # Name of the inverter
+    'Name': 'ABB__UNO_2_5_I_OUTD_S_US__277V_',  # Name of the inverter
+    'Efficiency':0.98
 }
 
 DEFAULT_MODULE = {
