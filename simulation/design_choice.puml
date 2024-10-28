@@ -1,0 +1,22 @@
+@startuml design_choice
+
+:backend;
+
+:PVlib;
+
+:Pandas;
+switch(API framework)
+case()
+    :Go Fiber;
+case()
+    :Python FastAPI;
+
+case()
+    :Python Flask;
+
+endswitch
+
+:REST API;
+
+
+@enduml

@@ -1,0 +1,17 @@
+@startuml mapreduce
+
+participant MasterNode
+
+participant Worker_node
+
+participant Reduce_node
+
+autonumber
+MasterNode -->Worker_node++: idle task is scheduled
+Worker_node ->Worker_node:mapping
+Worker_node -->MasterNode--:size and location of the intermediate file
+MasterNode -->Reduce_node++:forward the size and location of the intermediate file
+Reduce_node->Reduce_node:reducing
+
+
+@enduml

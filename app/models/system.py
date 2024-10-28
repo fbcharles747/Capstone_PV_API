@@ -10,6 +10,12 @@ class MountType(str,Enum):
     TRACK = 'track'
 
 class RackingModel(str,Enum):
+    OPEN_RACK='open_rack'
+    CLOSE_MOUNT='close_mount'
+    INSULATED_BACK='insulated_back'
+
+
+class ModuleType(str,Enum):
     GLASS_POLYMER = 'glass_polymer'
     GLASS_GLASS = 'glass_glass'
 
@@ -17,7 +23,7 @@ class RackingModel(str,Enum):
 class FixMount(BaseModel):
     surface_tilt: Annotated[float, Body(description="Surface tilt angle in degrees")] = 45
     surface_azimuth: Annotated[float, Body(description="Surface azimuth angle in degrees")] = 180
-    racking_model: Annotated[RackingModel, Body(description="Racking model, either 'glass_polymer' or 'glass_glass'")] = RackingModel.GLASS_POLYMER
+    racking_model: Annotated[RackingModel, Body(description="Racking model, Valid strings are 'open_rack', 'close_mount', and 'insulated_back'.")] = RackingModel.OPEN_RACK
     module_height: Annotated[float, Body(description="Module height above ground in meters")] = 1
     def __init__(self,**kwarg):
         super().__init__(**kwarg)
@@ -35,6 +41,7 @@ class TrackerMount(BaseModel):
 
 class SolarArray(BaseModel):
     albedo: Annotated[float, Body(description="Surface albedo")] = 0.25
+    module_type:Annotated[ModuleType,Body(description="module type. Valid strings are 'glass_polymer' and 'glass_glass'")]=ModuleType.GLASS_GLASS
     modules_per_string: Annotated[int, Body(description="Number of modules per string")] = 25
     strings: Annotated[int, Body(description="Number of strings")] = 1
     mount: Annotated[MountType, Body(description="Mount type, either 'fix' or 'track'")] = MountType.FIX

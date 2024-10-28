@@ -1,0 +1,28 @@
+@startuml general_interaction
+
+participant Dashboard
+participant Simulation_API
+
+database simulation_API_storage
+database simulation_data_storage
+
+
+Dashboard --> Simulation_API++:start login session
+    Simulation_API --> simulation_API_storage++:retrieve user information
+    simulation_API_storage --> Simulation_API--
+    Dashboard-->Simulation_API++:configure device, location
+        Simulation_API --> simulation_API_storage++:store user configuration
+        simulation_API_storage --> Simulation_API--
+    Simulation_API --> Dashboard--
+
+    Dashboard-->Simulation_API++:get simulation data
+    Simulation_API-->Dashboard--
+
+    Dashboard-->simulation_data_storage++:store simulated data for historical data analysis
+    simulation_data_storage-->Dashboard--
+
+Simulation_API --> Dashboard--:login session expire
+
+
+
+@enduml
