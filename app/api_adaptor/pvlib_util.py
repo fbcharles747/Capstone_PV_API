@@ -102,6 +102,9 @@ def run_model(location:LocationModel,weather:Weather_Data,module:SolarModuleMode
     precipitable_water=pvlib.atmosphere.gueymard94_pw(weather_data['temp_air'],weather_data['humidity'])
     weather_data.update(precipitable_water=precipitable_water)
     weather_data.pop('humidity')
+
+    print(f'weather: {weather_data}')
+
     pvlib_weather=pd.DataFrame([weather_data],index=[pd.Timestamp(datetime.now(tz=timezone.utc))])
 
     model_chain=ModelChain(system=pvlib_system,location=pvlib_location,aoi_model='no_loss')
