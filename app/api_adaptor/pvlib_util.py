@@ -105,7 +105,8 @@ def run_model(location:LocationModel,weather:Weather_Data,module:SolarModuleMode
 
     print(f'weather: {weather_data}')
 
-    pvlib_weather=pd.DataFrame([weather_data],index=[pd.Timestamp('2024-11-04T19:15:00Z')])
+    # note that pvlib only work with hardcoded date, I put my birthday just to bypass it
+    pvlib_weather=pd.DataFrame([weather_data],index=[pd.Timestamp('2024-12-16T19:15:00Z')])
 
     model_chain=ModelChain(system=pvlib_system,location=pvlib_location,aoi_model='no_loss')
     model_chain.run_model(pvlib_weather)
