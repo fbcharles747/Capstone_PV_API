@@ -81,8 +81,8 @@ def run_model(location:LocationModel,weather:Weather_Data,module:SolarModuleMode
         inverter_parameters=inverter.model_dump(),
         strings_per_inverter=system.array_config.strings,
         modules_per_string=system.array_config.modules_per_string,
-        racking_model=system.array_config.fix_mount.racking_model,
-        module_type=system.array_config.module_type
+        racking_model=system.array_config.fix_mount.racking_model.value,
+        module_type=system.array_config.module_type.value
     )
     print(pvlib_system)
     print(f'inverter params: {pvlib_system.inverter_parameters}')

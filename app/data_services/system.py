@@ -34,7 +34,7 @@ class PVSystemService(BaseService[PVSystemModel]):
             field_to_update.update({"num_of_array":num_of_array})
         
         if arrayConfig is not None:
-            field_to_update.update({'array_config':arrayConfig})
+            field_to_update.update({'array_config':arrayConfig.model_dump()})
         
         return self.update_ById(systemId,field_to_change=field_to_update)
     
@@ -50,7 +50,7 @@ class PVSystemService(BaseService[PVSystemModel]):
     
     
     def run_model(self,location:LocationModel,weather:Weather_Data,module:SolarModuleModel,inverter:InverterModel,system:PVSystemModel)->ModelResult:
-        result=ModelResult()
+        
         single_array_result=pvlib_adaptor.run_model(
             location=location,
             weather=weather,
@@ -58,7 +58,7 @@ class PVSystemService(BaseService[PVSystemModel]):
             inverter=inverter,
             system=system
         )
-
+        result=ModelResult(single_array_status=single_array_result)
         result.single_array_status=single_array_result
         result.system_dc_power=system.num_of_array * single_array_result.p_mp
         result.system_ac_power=result.system_dc_power * inverter.Efficiency

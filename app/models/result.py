@@ -1,6 +1,6 @@
 from typing import Annotated
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime,timezone
 from fastapi import Body
 class SingleArrayStatus(BaseModel):
   p_mp:Annotated[float,Body(description="dc power output of single array (W)")]
@@ -12,11 +12,11 @@ class SingleArrayStatus(BaseModel):
         super().__init__(**kwargs)
   
 class ModelResult(BaseModel):
-  time_stamp:datetime
-  calendar_year:Annotated[int,Body(description="year of the time stamp")]
-  month:Annotated[int,Body(description="month of the time stamp")]
-  day_of_month:Annotated[int,Body(description="days of the month")]
-  system_ac_power:Annotated[float,Body(description="ac output power of the system in Watt (W)")]
-  system_dc_power:Annotated[float,Body(description='dc output power of all solar panel in Watt (W)')]
-  single_array_status:Annotated[SingleArrayStatus,Body(description="modeling result of single array in a system")]
+  time_stamp:datetime=datetime.now(tz=timezone.utc)
+  calendar_year:Annotated[int,Body(description="year of the time stamp")]=datetime.now(tz=timezone.utc).year
+  month:Annotated[int,Body(description="month of the time stamp")]=datetime.now(tz=timezone.utc).month
+  day_of_month:Annotated[int,Body(description="days of the month")]=datetime.now(tz=timezone.utc).day
+  system_ac_power:Annotated[float,Body(description="ac output power of the system in Watt (W)")]=0
+  system_dc_power:Annotated[float,Body(description='dc output power of all solar panel in Watt (W)')]=0
+  single_array_status:Annotated[SingleArrayStatus,Body(description="modeling result of single array in a system")]=None
   
