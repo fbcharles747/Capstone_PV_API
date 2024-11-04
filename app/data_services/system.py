@@ -1,10 +1,15 @@
 from pymongo.database import Database
+from datetime import datetime,timezone
 from app.data_services.base import BaseService
 from app.models.system import PVSystemModel,SolarArray
 from app.models.inverter import InverterModel
 from app.models.solar_module import SolarModuleModel
 from app.models.location import LocationModel
+from app.models.result import ModelResult
 from app.api_adaptor.aggregate_data import Weather_Data
+
+
+import app.api_adaptor.pvlib_util as pvlib_adaptor
 
 class PVSystemService(BaseService[PVSystemModel]):
     def __init__(self, collection_name: str, db: Database, default_pv_system: PVSystemModel):
@@ -44,7 +49,25 @@ class PVSystemService(BaseService[PVSystemModel]):
         return self.create(system)
     
     
-    def run_model(self,location:LocationModel,weather:Weather_Data,module:SolarModuleModel,inverter:InverterModel,system:PVSystemModel):
-        pass
+    def run_model(self,location:LocationModel,weather:Weather_Data,module:SolarModuleModel,inverter:InverterModel,system:PVSystemModel)->ModelResult:
+        result=ModelResult()
+        single_array_result=pvlib_adaptor.run_model(
+            location=location,
+            weather=weather,
+            module=module,
+            inverter=inverter,
+            system=system
+        )
+
+        result.single_array_status=single_array_result
+        result.system_dc_power=system.num_of_array * single_array_result.p_mp
+        result.system_ac_power=result.system_dc_power * inverter.Efficiency
+        result.time_stamp=datetime.now(tz=timezone.utc)
+        result.calendar_year=result.time_stamp.year
+        result.month=result.time_stamp.month
+        result.day_of_month= result.time_stamp.day
+
+
+        return result
 
 
