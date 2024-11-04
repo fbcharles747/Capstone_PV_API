@@ -8,6 +8,7 @@ from app.data_services.inverter import InverterService
 from app.data_services.solar_module import SolarModuleService
 from app.models.user import User
 from app.models.system import PVSystemModel,SolarArray
+from app.models.result import ModelResult
 from typing import Annotated
 
 class PVSystemHandler(BaseHandler):
@@ -91,8 +92,34 @@ class PVSystemHandler(BaseHandler):
         async def run_model(
             token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
             apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)]
-        ):
+        )->ModelResult:
             user=get_user(token=token,apikey=apikey)
+            location=self.__location_service.get_location_ById(user.location_Id)
+            weather=self.__location_service.get_current_weather(latitude=location.latitude,longitude=location.longitude)
+            if weather is None:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="not able to get current weather data"
+                )
+            inverter=self.__inverter_service.get_inverter_ById(user.inverter_Id)
+            module=self.__solarmodule_service.get_solar_module(user.solarModule_Id)
+            
+            system=self.__system_service.get_pv_system(user.system_Id)
+
+            result=self.__system_service.run_model(
+                location=location,
+                weather=weather,
+                module=module,
+                inverter=inverter,
+                system=system
+            )
+
+            return result
+
+
+
+
+
 
             
 
