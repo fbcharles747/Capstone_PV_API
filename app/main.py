@@ -39,6 +39,9 @@ gmap_apikey=os.getenv("GOOGLEMAP_APIKEY")
 opweather_apikey=os.getenv("OPENWEATHER_APIKEY")
 solcast_apikey=os.getenv("SOLCAST_APIKEY")
 secret=os.getenv("SECRET_KEY")
+elastic_pass=os.getenv("ELASTIC_PASSWORD")
+cert_fingerprint=os.getenv("CERT_FINGERPRINT")
+elastic_path=os.getenv("ELASTIC_PATH")
 # database connection
 
 client=MongoClient(db_uri)
@@ -156,10 +159,14 @@ async def login_for_access_token(
     return Token(access_token=access_token, token_type="bearer")
 
 @app.get("/test")
-async def test_auth(authenticated:Annotated[bool,Depends(oauth_handler.verify_token)],
-                    apikey_authenticated:Annotated[bool,Depends(apikey_handler.verify_api_key)]):
-   
-    return f"api key auth: {apikey_authenticated}   oauth auth:{authenticated}"
+async def test_auth():
+    print(f'connect to elastic path: {elastic_path}')
+    from elasticsearch import Elasticsearch
+    client=Elasticsearch(
+        hosts=elastic_path,
+        basic_auth=("elastic",elastic_pass)
+    )
+    return client.info()
 
 
 # register pathes of each handler
