@@ -7,14 +7,18 @@ from app.models.solar_module import SolarModuleModel
 from app.models.location import LocationModel
 from app.models.result import ModelResult
 from app.api_adaptor.aggregate_data import Weather_Data
+from app.api_adaptor.elastic_search import EsAdaptor
+from elasticsearch import Elasticsearch
+
 
 
 import app.api_adaptor.pvlib_util as pvlib_adaptor
 
 class PVSystemService(BaseService[PVSystemModel]):
-    def __init__(self, collection_name: str, db: Database, default_pv_system: PVSystemModel):
+    def __init__(self, collection_name: str, db: Database, default_pv_system: PVSystemModel,es_client:Elasticsearch):
         super().__init__(collection_name, db)
         self.__default = default_pv_system
+        self.__esAdaptor=EsAdaptor[ModelResult](client=es_client)
 
     def get_pv_system(self, system_Id: str) -> PVSystemModel:
         if system_Id is None:
@@ -69,5 +73,9 @@ class PVSystemService(BaseService[PVSystemModel]):
 
 
         return result
+    
+    def store_result(self,system_id:str,result:ModelResult)->bool:
+        return self.__esAdaptor.insert(index=system_id,document=result)
+    
 
 

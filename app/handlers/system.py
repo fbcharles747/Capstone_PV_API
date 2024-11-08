@@ -9,6 +9,7 @@ from app.data_services.solar_module import SolarModuleService
 from app.models.user import User
 from app.models.system import PVSystemModel,SolarArray
 from app.models.result import ModelResult
+from app.util.handler_return import ResponseModifier,ResponseWithMsg
 from typing import Annotated
 
 class PVSystemHandler(BaseHandler):
@@ -27,6 +28,7 @@ class PVSystemHandler(BaseHandler):
         self.__location_service=location_service
         self.__inverter_service=inverter_service
         self.__solarmodule_service=solarMod_service
+        self.__resp_modifier=ResponseModifier[ModelResult]()
 
 
     def register_routes(self):
@@ -92,7 +94,7 @@ class PVSystemHandler(BaseHandler):
         async def run_model(
             token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
             apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)]
-        )->ModelResult:
+        )->ResponseWithMsg[ModelResult]:
             user=get_user(token=token,apikey=apikey)
             location=self.__location_service.get_location_ById(user.location_Id)
             weather=self.__location_service.get_current_weather(latitude=location.latitude,longitude=location.longitude)
@@ -114,7 +116,17 @@ class PVSystemHandler(BaseHandler):
                 system=system
             )
 
-            return result
+            
+            if user.system_Id is None:
+                return self.__resp_modifier.craft_with_msg(msg="You have not configure the system yet. Configure the system to store modelling result",
+                                                             document=result)
+            
+            created=self.__system_service.store_result(system_id=user.system_Id,result=result)
+            if not created:
+                return self.__resp_modifier.craft_with_msg(msg="fail to record the result",document=result)
+            
+
+            return self.__resp_modifier.craft_with_msg(msg="the result is recorded",inserted=True,document=result)
 
 
 

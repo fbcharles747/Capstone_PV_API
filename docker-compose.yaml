@@ -56,5 +56,10 @@ services:
       timeout: 10s
       retries: 3
 
+    volumes:
+      - esDB:/usr/share/elasticsearch/data
+
 volumes:
   testDB:
+
+  esDB:

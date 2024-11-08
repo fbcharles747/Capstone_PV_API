@@ -25,7 +25,9 @@ import os
 from app.api_adaptor.google_map import GoogleMap_Adaptor
 from app.api_adaptor.open_weather_map import OpenWeather_Adaptor
 from app.api_adaptor.solcast_api import Solcast_Adaptor
+from app.api_adaptor.elastic_search import EsAdaptor
 from app.constant.mongo_collection import Collections
+from elasticsearch import Elasticsearch
 
 # these are secret, need to be taken out in production
 # secret='Gkq3b7z8J9k8L1k9J8k3L1k9J8k3L1k9J8k3L1k9J8k='
@@ -48,6 +50,11 @@ client=MongoClient(db_uri)
 db=client.get_database("testDB")
 gmap_client=Client(key=gmap_apikey)
 
+es_client=Elasticsearch(
+        hosts=elastic_path,
+        basic_auth=("elastic",elastic_pass)
+    )
+
 # api adaptor
 gmap_adaptor=GoogleMap_Adaptor(gmap_client)
 opweather_adaptor=OpenWeather_Adaptor(apikey=opweather_apikey)
@@ -62,6 +69,8 @@ location_service=LocationService(default_location=LocationModel(**DEFAULT_LOCATI
                                  gmap_adaptor=gmap_adaptor,
                                  open_weather_adaptor=opweather_adaptor,
                                  solcast_adaptor=solcast_adaptor)
+
+es_adaptor=EsAdaptor(client=es_client)
 
 inverter_service=InverterService(
     collection_name=Collections.INVERTER_COLLECTION.value,
@@ -84,7 +93,8 @@ default_system=PVSystemModel(
 system_service=PVSystemService(
     collection_name=Collections.PVSYSTEM_COLLECTION,
     db=db,
-    default_pv_system=default_system
+    default_pv_system=default_system,
+    es_client=es_client
 )
 
 
