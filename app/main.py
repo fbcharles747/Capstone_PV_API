@@ -70,7 +70,6 @@ location_service=LocationService(default_location=LocationModel(**DEFAULT_LOCATI
                                  open_weather_adaptor=opweather_adaptor,
                                  solcast_adaptor=solcast_adaptor)
 
-es_adaptor=EsAdaptor(client=es_client)
 
 inverter_service=InverterService(
     collection_name=Collections.INVERTER_COLLECTION.value,
