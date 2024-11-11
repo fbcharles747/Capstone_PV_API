@@ -8,7 +8,7 @@ from app.data_services.inverter import InverterService
 from app.data_services.solar_module import SolarModuleService
 from app.models.user import User
 from app.models.system import PVSystemModel,SolarArray
-from app.models.result import ModelResult
+from app.models.result import ModelResult,AnalyticResult
 from app.util.handler_return import ResponseModifier,ResponseWithMsg
 from typing import Annotated
 
@@ -127,7 +127,38 @@ class PVSystemHandler(BaseHandler):
             
 
             return self.__resp_modifier.craft_with_msg(msg="the result is recorded",inserted=True,document=result)
-
+        
+        @self.app.get("/system_performance/live",tags=["Analytics"])
+        async def get_performance_live(
+            token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
+            apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)]
+            )->list[ModelResult]:
+            user=get_user(token=token,apikey=apikey)
+            if user.system_Id is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="user has not yet configure the system"
+                )
+            return self.__system_service.get_live_performance(system_id=user.system_Id)
+        
+        @self.app.get("/system_performance/historical",tags=["Analytics"])
+        async def get_performance_historical(
+            token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
+            apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)],
+            calendar_year:int=Query(2024,gt=0),
+            month:int=Query(None,ge=1,le=12)
+            )->list[AnalyticResult]:
+            user=get_user(token=token,apikey=apikey)
+            if user.system_Id is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="user has not yet configure the system"
+                )
+            return self.__system_service.get_longterm_analysis(
+                system_id=user.system_Id,
+                calendar_year=calendar_year,
+                month=month
+            )
 
 
 
