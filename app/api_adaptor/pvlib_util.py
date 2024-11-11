@@ -72,7 +72,6 @@ def run_model(location:LocationModel,weather:Weather_Data,module:SolarModuleMode
         name=location.name
     )
 
-    print(f'location: {pvlib_location}')
 
     pvlib_system=PVSystem(
         surface_tilt=system.array_config.fix_mount.surface_tilt,
@@ -84,9 +83,6 @@ def run_model(location:LocationModel,weather:Weather_Data,module:SolarModuleMode
         racking_model=system.array_config.fix_mount.racking_model.value,
         module_type=system.array_config.module_type.value
     )
-    print(pvlib_system)
-    print(f'inverter params: {pvlib_system.inverter_parameters}')
-    print(f'module params: {pvlib_system.arrays[0].module_parameters}')
 
     weather_data={
         'ghi':weather.ghi,
@@ -97,13 +93,11 @@ def run_model(location:LocationModel,weather:Weather_Data,module:SolarModuleMode
         'humidity':weather.humidity
     }
 
-    print(f'weather: {weather_data}')
 
     precipitable_water=pvlib.atmosphere.gueymard94_pw(weather_data['temp_air'],weather_data['humidity'])
     weather_data.update(precipitable_water=precipitable_water)
     weather_data.pop('humidity')
 
-    print(f'weather: {weather_data}')
 
     # note that pvlib only work with hardcoded date, I put my birthday just to bypass it
     pvlib_weather=pd.DataFrame([weather_data],index=[pd.Timestamp('2024-12-16T19:15:00Z')])
