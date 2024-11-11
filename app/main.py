@@ -167,15 +167,18 @@ async def login_for_access_token(
     
     return Token(access_token=access_token, token_type="bearer")
 
+from app.models.user import User
 @app.get("/test")
-async def test_auth():
-    print(f'connect to elastic path: {elastic_path}')
-    from elasticsearch import Elasticsearch
-    client=Elasticsearch(
-        hosts=elastic_path,
-        basic_auth=("elastic",elastic_pass)
-    )
-    return client.info()
+async def test_auth(user:Annotated[User,Depends(oauth_handler.get_current_user)]):
+    from app.api_adaptor.elastic_search import EsAdaptor
+    modelResult_adaptor=EsAdaptor(client=es_client)
+
+    return modelResult_adaptor.get_past_24h(index=user.system_Id,timestamp_field="time_stamp")
+    # return modelResult_adaptor.get_timebucket_stats(index=user.system_Id,
+    #                                                 time_stamp_field="time_stamp",
+    #                                                 filters={"calendar_year":2024,"month":11},
+    #                                                 stats_field={"system_ac_stats":"system_ac_power","single_array_power":"single_array_status.p_mp"},
+    #                                                 calendar_interval='hour')
 
 
 # register pathes of each handler
