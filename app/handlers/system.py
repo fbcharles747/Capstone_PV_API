@@ -11,6 +11,7 @@ from app.models.system import PVSystemModel,SolarArray
 from app.models.result import ModelResult,AnalyticResult
 from app.util.handler_return import ResponseModifier,ResponseWithMsg
 from typing import Annotated
+from datetime import datetime
 
 class PVSystemHandler(BaseHandler):
     def __init__(self,
@@ -145,7 +146,7 @@ class PVSystemHandler(BaseHandler):
         async def get_performance_historical(
             token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
             apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)],
-            calendar_year:int=Query(2024,gt=0),
+            calendar_year:int=Query(datetime.now().year,gt=0),
             month:int=Query(None,ge=1,le=12)
             )->list[AnalyticResult]:
             user=get_user(token=token,apikey=apikey)
