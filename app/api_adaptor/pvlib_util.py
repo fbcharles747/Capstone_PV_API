@@ -1,8 +1,21 @@
 import pvlib
+from pvlib.location import Location
+from pvlib.pvsystem import PVSystem,FixedMount, SingleAxisTrackerMount
+from pvlib.modelchain import ModelChain
+
 import pandas as pd
-from datetime import datetime
+from datetime import datetime,timezone
 from zoneinfo import ZoneInfo
 from pydantic import BaseModel
+
+
+from app.models.inverter import InverterModel
+from app.models.location import LocationModel
+from app.models.solar_module import SolarModuleModel
+from app.models.system import PVSystemModel
+from app.models.result import SingleArrayStatus
+
+from app.api_adaptor.aggregate_data import Weather_Data
 
 
 class Solargis_TMY_Irradiance(BaseModel):
@@ -49,3 +62,50 @@ def get_current_irradiance_tmy(latitude: float, longitude: float) -> Solargis_TM
     obj = result.loc[result['diff_from_now'].idxmin()]
     
     return Solargis_TMY_Irradiance(**obj.to_dict())
+
+def run_model(location:LocationModel,weather:Weather_Data,module:SolarModuleModel,inverter:InverterModel,system:PVSystemModel)->SingleArrayStatus:
+    pvlib_location=Location(
+        latitude=location.latitude,
+        longitude=location.longitude,
+        tz=location.timezone,
+        altitude=location.altitude,
+        name=location.name
+    )
+
+
+    pvlib_system=PVSystem(
+        surface_tilt=system.array_config.fix_mount.surface_tilt,
+        surface_azimuth=system.array_config.fix_mount.surface_azimuth,
+        module_parameters=module.model_dump(),
+        inverter_parameters=inverter.model_dump(),
+        strings_per_inverter=system.array_config.strings,
+        modules_per_string=system.array_config.modules_per_string,
+        racking_model=system.array_config.fix_mount.racking_model.value,
+        module_type=system.array_config.module_type.value
+    )
+
+    weather_data={
+        'ghi':weather.ghi,
+        'dni':weather.dni,
+        'dhi':weather.dhi,
+        'temp_air':weather.temp,
+        'wind_speed':weather.wind_speed,
+        'humidity':weather.humidity
+    }
+
+
+    precipitable_water=pvlib.atmosphere.gueymard94_pw(weather_data['temp_air'],weather_data['humidity'])
+    weather_data.update(precipitable_water=precipitable_water)
+    weather_data.pop('humidity')
+
+
+    # note that pvlib only work with hardcoded date, I put my birthday just to bypass it
+    pvlib_weather=pd.DataFrame([weather_data],index=[pd.Timestamp('2024-12-16T19:15:00Z')])
+
+    model_chain=ModelChain(system=pvlib_system,location=pvlib_location,aoi_model='no_loss')
+    model_chain.run_model(pvlib_weather)
+
+    result=model_chain.results.dc.reset_index(names='time_stamp').loc[0].to_dict()
+
+
+    return SingleArrayStatus(**result)

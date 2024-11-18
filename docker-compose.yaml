@@ -13,6 +13,10 @@ services:
       - GOOGLEMAP_APIKEY=AIzaSyBF2slAi7qpMnjPkcsqkQ0R59rYN9sOnNA
       - OPENWEATHER_APIKEY=8bcf71b09bb730ee178c4d36c09206c1
       - SOLCAST_APIKEY=RmgJvrtEEwUTQp4eGIshBNuy2VK05gpv
+      # generate with `openssl x509 -fingerprint -sha256 -noout -in /path/to/http_ca.crt`
+      - CERT_FINGERPRINT=0D:71:7E:DD:66:42:D8:BC:74:89:8D:8A:89:C7:CD:BD:1E:1C:68:E8:4D:3E:50:02:3F:FB:91:1E:44:D9:F3:68
+      - ELASTIC_PASSWORD=changeme
+      - ELASTIC_PATH=http://elasticsearch:9200
     volumes:
       - ./app:/code/app
     depends_on:
@@ -37,5 +41,25 @@ services:
     volumes:
       - testDB:/data/db
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    ports:
+      - 9200:9200
+    environment:
+      - ELASTIC_PASSWORD=changeme
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f https://localhost:9200 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    volumes:
+      - esDB:/usr/share/elasticsearch/data
+
 volumes:
   testDB:
+
+  esDB:

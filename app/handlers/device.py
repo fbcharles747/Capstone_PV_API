@@ -53,7 +53,7 @@ class DeviceHandler(BaseHandler):
                         detail="Inverter creation failed"
                     )
 
-            updated = self.__inverter_service.update_ById(id=user.inverter_Id,field_to_change=inverter.__dict__)
+            updated = self.__inverter_service.update_ById(id=user.inverter_Id,field_to_change=inverter.model_dump())
             
             if not updated:
                 raise HTTPException(
@@ -109,7 +109,7 @@ class DeviceHandler(BaseHandler):
                         detail="module creation failed"
                     )
 
-            updated = self.__module_service.update_ById(user.solarModule_Id,module.__dict__)
+            updated = self.__module_service.update_ById(user.solarModule_Id,module.model_dump())
             
             if not updated:
                 raise HTTPException(

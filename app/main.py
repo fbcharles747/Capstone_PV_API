@@ -17,13 +17,17 @@ from app.models.security import Token
 from app.models.inverter import InverterModel
 from app.models.solar_module import SolarModuleModel
 from app.models.system import PVSystemModel,SolarArray
+from app.models.location import LocationModel
 from app.constant.devices import DEFAULT_INVERTER,DEFAULT_MODULE
+from app.constant.location import DEFAULT_LOCATION
 from typing import Annotated
 import os
 from app.api_adaptor.google_map import GoogleMap_Adaptor
 from app.api_adaptor.open_weather_map import OpenWeather_Adaptor
 from app.api_adaptor.solcast_api import Solcast_Adaptor
+from app.api_adaptor.elastic_search import EsAdaptor
 from app.constant.mongo_collection import Collections
+from elasticsearch import Elasticsearch
 
 # these are secret, need to be taken out in production
 # secret='Gkq3b7z8J9k8L1k9J8k3L1k9J8k3L1k9J8k3L1k9J8k='
@@ -37,11 +41,19 @@ gmap_apikey=os.getenv("GOOGLEMAP_APIKEY")
 opweather_apikey=os.getenv("OPENWEATHER_APIKEY")
 solcast_apikey=os.getenv("SOLCAST_APIKEY")
 secret=os.getenv("SECRET_KEY")
+elastic_pass=os.getenv("ELASTIC_PASSWORD")
+cert_fingerprint=os.getenv("CERT_FINGERPRINT")
+elastic_path=os.getenv("ELASTIC_PATH")
 # database connection
 
 client=MongoClient(db_uri)
 db=client.get_database("testDB")
 gmap_client=Client(key=gmap_apikey)
+
+es_client=Elasticsearch(
+        hosts=elastic_path,
+        basic_auth=("elastic",elastic_pass)
+    )
 
 # api adaptor
 gmap_adaptor=GoogleMap_Adaptor(gmap_client)
@@ -51,10 +63,13 @@ solcast_adaptor=Solcast_Adaptor(apikey=solcast_apikey)
 user_data_service=UserService(secret_key=secret,
                               collection_name=Collections.USER_COLLECTION.value,
                               db=db)
-location_service=LocationService(collection_name=Collections.LOCATION_COLLECTION.value,db=db,
+location_service=LocationService(default_location=LocationModel(**DEFAULT_LOCATION),
+                                collection_name=Collections.LOCATION_COLLECTION.value,
+                                db=db,
                                  gmap_adaptor=gmap_adaptor,
                                  open_weather_adaptor=opweather_adaptor,
                                  solcast_adaptor=solcast_adaptor)
+
 
 inverter_service=InverterService(
     collection_name=Collections.INVERTER_COLLECTION.value,
@@ -77,7 +92,8 @@ default_system=PVSystemModel(
 system_service=PVSystemService(
     collection_name=Collections.PVSYSTEM_COLLECTION,
     db=db,
-    default_pv_system=default_system
+    default_pv_system=default_system,
+    es_client=es_client
 )
 
 
@@ -121,6 +137,9 @@ device_handler=DeviceHandler(
 )
 
 system_handler=PVSystemHandler(
+    location_service=location_service,
+    inverter_service=inverter_service,
+    solarMod_service=module_service,
     data_service=system_service,
     user_service=user_data_service,
     app=app,
@@ -148,11 +167,18 @@ async def login_for_access_token(
     
     return Token(access_token=access_token, token_type="bearer")
 
+from app.models.user import User
 @app.get("/test")
-async def test_auth(authenticated:Annotated[bool,Depends(oauth_handler.verify_token)],
-                    apikey_authenticated:Annotated[bool,Depends(apikey_handler.verify_api_key)]):
-   
-    return f"api key auth: {apikey_authenticated}   oauth auth:{authenticated}"
+async def test_auth(user:Annotated[User,Depends(oauth_handler.get_current_user)]):
+    from app.api_adaptor.elastic_search import EsAdaptor
+    modelResult_adaptor=EsAdaptor(client=es_client)
+
+    return modelResult_adaptor.get_past_24h(index=user.system_Id,timestamp_field="time_stamp")
+    # return modelResult_adaptor.get_timebucket_stats(index=user.system_Id,
+    #                                                 time_stamp_field="time_stamp",
+    #                                                 filters={"calendar_year":2024,"month":11},
+    #                                                 stats_field={"system_ac_stats":"system_ac_power","single_array_power":"single_array_status.p_mp"},
+    #                                                 calendar_interval='hour')
 
 
 # register pathes of each handler

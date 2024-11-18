@@ -10,6 +10,8 @@ class InverterService(BaseService[InverterModel]):
     
     
     def get_inverter_ById(self, inverter_Id:str)->InverterModel:
+        if inverter_Id is None:
+            return self.__default
         result=self.read_by_Id(inverter_Id)
         if result is not None:
             return InverterModel(**result)
