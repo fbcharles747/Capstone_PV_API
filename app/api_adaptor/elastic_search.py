@@ -52,7 +52,7 @@ class EsAdaptor(Generic[T]):
                     "lte":"now/h"
                 }
             }
-        },sort=[{timestamp_field:{"order":'desc'}}])
+        },sort=[{timestamp_field:{"order":'asc'}}])
         return resp['hits']['hits']
     
     def get_timebucket_stats(self,index:str,time_stamp_field:str,calendar_interval:CalendarInterval,filters:dict,stats_field:dict):
