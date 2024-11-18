@@ -8,7 +8,6 @@ from app.models.inverter import InverterModel
 from app.models.solar_module import SolarModuleModel
 from fastapi import FastAPI, HTTPException, status, Depends
 from typing import Annotated
-from app.api_adaptor.aggregate_data import Weather_Data  # If needed
 
 class DeviceHandler(BaseHandler):
     def __init__(self, 

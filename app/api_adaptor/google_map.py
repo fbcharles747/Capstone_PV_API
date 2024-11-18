@@ -3,8 +3,6 @@ from googlemaps.elevation import elevation
 from googlemaps.timezone import timezone
 from googlemaps.exceptions import ApiError, HTTPError, Timeout, TransportError
 from googlemaps.client import Client
-from datetime import datetime
-from zoneinfo import ZoneInfo
 
 class GoogleTimeZone(BaseModel):
     dstOffset: int | None
