@@ -25,24 +25,21 @@ import os
 from app.api_adaptor.google_map import GoogleMap_Adaptor
 from app.api_adaptor.open_weather_map import OpenWeather_Adaptor
 from app.api_adaptor.solcast_api import Solcast_Adaptor
-from app.api_adaptor.elastic_search import EsAdaptor
 from app.constant.mongo_collection import Collections
 from elasticsearch import Elasticsearch
+from get_docker_secret import get_docker_secret
 
-# these are secret, need to be taken out in production
-# secret='Gkq3b7z8J9k8L1k9J8k3L1k9J8k3L1k9J8k3L1k9J8k='
-# gmap_apikey='AIzaSyBF2slAi7qpMnjPkcsqkQ0R59rYN9sOnNA'
-# opweather_apikey='8bcf71b09bb730ee178c4d36c09206c1'
-# db_uri="mongodb://user:pass@localhost:27017/"
 oauth2Scheme=OAuth2PasswordBearer(tokenUrl="token")
-# uncoment this line when running in container environment
-db_uri=os.getenv("CONNECTION_STR")
-gmap_apikey=os.getenv("GOOGLEMAP_APIKEY")
-opweather_apikey=os.getenv("OPENWEATHER_APIKEY")
-solcast_apikey=os.getenv("SOLCAST_APIKEY")
-secret=os.getenv("SECRET_KEY")
-elastic_pass=os.getenv("ELASTIC_PASSWORD")
-cert_fingerprint=os.getenv("CERT_FINGERPRINT")
+gmap_apikey=get_docker_secret('googlemap_apikey',default="no google map apikey")
+opweather_apikey=get_docker_secret('openweather_apikey',default='cannot get openweather apikey')
+solcast_apikey=get_docker_secret('solcast_apikey',default='no solcast apikey')
+elastic_pass=get_docker_secret('elasticsearch_password',default='no elastic search password')
+secret=get_docker_secret('api_secret')
+mongo_user=get_docker_secret('MONGO_INITDB_ROOT_USERNAME')
+mongodb_password=get_docker_secret('MONGO_INITDB_ROOT_PASSWORD')
+db_uri=f'mongodb://{mongo_user}:{mongodb_password}@mongodb'
+test_secret=get_docker_secret('test_secret')
+print(f'The value of test secret is: {test_secret}')
 elastic_path="http://elasticsearch:9200"
 # database connection
 
@@ -150,7 +147,7 @@ system_handler=PVSystemHandler(
 
 @app.get("/")
 async def root():
-    return "Hello there! go to `/docs` for documentation"
+    return "Hi! go to `/docs` for documentation"
 
 @app.post("/token")
 async def login_for_access_token(
@@ -167,18 +164,6 @@ async def login_for_access_token(
     
     return Token(access_token=access_token, token_type="bearer")
 
-from app.models.user import User
-@app.get("/test")
-async def test_auth(user:Annotated[User,Depends(oauth_handler.get_current_user)]):
-    from app.api_adaptor.elastic_search import EsAdaptor
-    modelResult_adaptor=EsAdaptor(client=es_client)
-
-    return modelResult_adaptor.get_past_24h(index=user.system_Id,timestamp_field="time_stamp")
-    # return modelResult_adaptor.get_timebucket_stats(index=user.system_Id,
-    #                                                 time_stamp_field="time_stamp",
-    #                                                 filters={"calendar_year":2024,"month":11},
-    #                                                 stats_field={"system_ac_stats":"system_ac_power","single_array_power":"single_array_status.p_mp"},
-    #                                                 calendar_interval='hour')
 
 
 # register pathes of each handler

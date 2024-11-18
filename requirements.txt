@@ -12,6 +12,7 @@ elasticsearch==8.15.1
 email_validator==2.2.0
 fastapi==0.114.0
 fastapi-cli==0.0.5
+get-docker-secret==2.0.0
 googlemaps==4.10.0
 h11==0.14.0
 h5py==3.12.1
