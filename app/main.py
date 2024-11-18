@@ -43,7 +43,7 @@ solcast_apikey=os.getenv("SOLCAST_APIKEY")
 secret=os.getenv("SECRET_KEY")
 elastic_pass=os.getenv("ELASTIC_PASSWORD")
 cert_fingerprint=os.getenv("CERT_FINGERPRINT")
-elastic_path=os.getenv("ELASTIC_PATH")
+elastic_path="http://elasticsearch:9200"
 # database connection
 
 client=MongoClient(db_uri)

@@ -22,6 +22,8 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
 
   mongodb:
     image: mongodb/mongodb-community-server
@@ -51,7 +53,7 @@ services:
       - xpack.security.enabled=true
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -f https://localhost:9200 || exit 1"]
+      test: ["CMD-SHELL", "curl localhost:9200/_cat/health"]
       interval: 30s
       timeout: 10s
       retries: 3
