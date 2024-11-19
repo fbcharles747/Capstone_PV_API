@@ -1,0 +1,34 @@
+@startuml data_engineering
+
+
+participant API
+database mongodb
+participant OpenWeather_API
+participant Solcast_API
+database Elasticsearch
+
+
+
+
+
+
+    ->API++:run simulation
+        API --> mongodb++:get user specific configuration such as location, solar farm layout
+        mongodb-->API--
+        API-->mongodb++:load user configured location
+        mongodb-->API--:location
+        API --> OpenWeather_API++:load wind speed and temperature of the location
+        OpenWeather_API-->API--
+        API --> Solcast_API++:load irradiance data
+        Solcast_API --> API--
+        API -->Elasticsearch++:record the simulation result
+        Elasticsearch --> API--
+    <--API--: return the solar farm performance
+
+    ->API++:get monthly or annual data
+        API-->Elasticsearch++:query the data with time bucket
+        Elasticsearch -->API--: return statistic result
+    <-- API--
+
+
+@enduml
