@@ -60,6 +60,8 @@ services:
       retries: 3
     environment:
       - ELASTIC_PASSWORD_FILE=/run/secrets/elasticsearch_password
+      - discovery.type=single-node
+      - xpack.security.enabled=true
     volumes:
       - elasticsearch_simulation_db:/usr/share/elasticsearch/data
 
