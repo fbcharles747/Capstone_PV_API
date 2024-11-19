@@ -101,7 +101,7 @@ oauth_handler=JWTHandler(user_data_service=user_data_service,
                          algorithm="HS256",
                          expiry_delta=15)
 
-app=FastAPI()
+app=FastAPI(title="Operation Helio simulation API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
