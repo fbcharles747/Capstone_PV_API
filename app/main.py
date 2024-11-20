@@ -104,7 +104,14 @@ oauth_handler=JWTHandler(user_data_service=user_data_service,
                          algorithm="HS256",
                          expiry_delta=15)
 
-app=FastAPI()
+api_description:str=""
+
+with open("/code/app/description.md", 'r', encoding='utf-8') as file:
+    api_description=file.read()
+
+app=FastAPI(title="Operation Helios Simulation API",
+            description=api_description)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
