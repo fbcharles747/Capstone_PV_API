@@ -8,10 +8,6 @@ participant Solcast_API
 database Elasticsearch
 
 
-
-
-
-
     ->API++:run simulation
         API --> mongodb++:get user specific configuration such as location, solar farm layout
         mongodb-->API--
