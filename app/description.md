@@ -1,7 +1,7 @@
 ## Overview
 Our capstone project this year is to build an API that simulate the solar farm performance. The application logic is shown in the figure below.
 
-<a href="https://ibb.co/5BBJ6Gs"><img src="https://i.ibb.co/7220Xjr/simulation-api-sequence.png" alt="simulation-api-sequence" border="0"></a>
+<a href="https://ibb.co/0GYQwxd"><img src="https://i.ibb.co/sVstBZM/simulation-API-run-model.png" alt="simulation-API-run-model" border="0"></a>
 
 The simulation API will tie the user configuration and real-time weather data together, then it will generate the simulation result and store it in `Elasticsearch` database.
 
