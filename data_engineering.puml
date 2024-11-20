@@ -15,8 +15,6 @@ database Elasticsearch
     ->API++:run simulation
         API --> mongodb++:get user specific configuration such as location, solar farm layout
         mongodb-->API--
-        API-->mongodb++:load user configured location
-        mongodb-->API--:location
         API --> OpenWeather_API++:load wind speed and temperature of the location
         OpenWeather_API-->API--
         API --> Solcast_API++:load irradiance data
