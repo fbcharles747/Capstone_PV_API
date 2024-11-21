@@ -34,8 +34,8 @@ opweather_apikey=get_docker_secret('openweather_apikey',default='cannot get open
 solcast_apikey=get_docker_secret('solcast_apikey',default='no solcast apikey')
 elastic_pass=get_docker_secret('elasticsearch_password',default='no elastic search password')
 secret=get_docker_secret('api_secret')
-mongo_user=get_docker_secret('MONGO_INITDB_ROOT_USERNAME')
-mongodb_password=get_docker_secret('MONGO_INITDB_ROOT_PASSWORD')
+mongo_user=get_docker_secret('mongo_username')
+mongodb_password=get_docker_secret('mongo_password')
 print(f'mongo user: {mongo_user}')
 db_uri = f'mongodb://{mongo_user}:{mongodb_password}@mongodb:27017/testDB?authSource=admin&retryWrites=true&w=majority'
 test_secret=get_docker_secret('test_secret')
