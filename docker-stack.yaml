@@ -1,69 +1,72 @@
-version: "3.2"
+version: "3.8"
 
 services:
-  reverse_proxy:
-    image: chunchunhuang/op_helios_httpserver:1.0.5
-    ports:
-      - "80:80"
-      - "443:443"
-    secrets:
-      - source: revprox_cert
-        target: revprox_cert
-      - source: revprox_key
-        target: revprox_key
+  # reverse_proxy:
+  #   image: chunchunhuang/op_helios_httpserver:1.0.5
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   secrets:
+  #     - source: revprox_cert
+  #       target: revprox_cert
+  #     - source: revprox_key
+  #       target: revprox_key
 
-    networks:
-      - front-tier
-    deploy:
-      restart_policy:
-        condition: on-failure
-      replicas: 1
-    depends_on:
-      - simulation_api
+  #   networks:
+  #     - front-tier
+  #   deploy:
+  #     restart_policy:
+  #       condition: on-failure
+  #     replicas: 1
+  #   depends_on:
+  #     - simulation_api
 
-  simulation_api:
-    image: chunchunhuang/op_helio_simulation_api:1.0.3
-    secrets:
-      - mongo_username
-      - mongo_password
-      - api_secret
-      - elasticsearch_password
-      - googlemap_apikey
-      - openweather_apikey
-      - solcast_apikey
-      - test_secret
-    deploy:
-      replicas: 1
-      update_config:
-        parallelism: 1
-        failure_action: rollback
+  # simulation_api:
+  #   image: chunchunhuang/op_helio_simulation_api:1.0.3
+  #   secrets:
+  #     - mongo_username
+  #     - mongo_password
+  #     - api_secret
+  #     - elasticsearch_password
+  #     - googlemap_apikey
+  #     - openweather_apikey
+  #     - solcast_apikey
+  #     - test_secret
+  #   deploy:
+  #     replicas: 1
+  #     update_config:
+  #       parallelism: 1
+  #       failure_action: rollback
 
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
+  #     restart_policy:
+  #       condition: on-failure
+  #       delay: 5s
+  #       max_attempts: 3
+  #       window: 120s
 
-    networks:
-      - front-tier
-      - back-tier
+  #   networks:
+  #     - front-tier
+  #     - back-tier
 
   mongodb:
-    image: mongodb/mongodb-community-server
+    image: mongo
+    restart: always
     ports:
       - 27017:27017
     secrets:
       - mongo_username
       - mongo_password
+      - user
+      - access
+
     environment:
-      - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_username
-      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_password
+      # - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_username
+      # - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_password
+      - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/user
+      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/access
 
     volumes:
       - mongo_config_db:/data/db
-
-    deploy:
-      replicas: 1
 
     networks:
       - back-tier
@@ -126,4 +129,8 @@ secrets:
   revprox_cert:
     external: true
   revprox_key:
+    external: true
+  user: 
+    external: true
+  access:
     external: true
