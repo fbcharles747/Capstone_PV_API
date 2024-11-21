@@ -2,6 +2,7 @@ version: "3.2"
 
 services:
   reverse_proxy:
+    image: chunchunhuang/op_helios_httpserver:latest
     ports:
       - "80:80"
       - "443:443"
@@ -10,11 +11,15 @@ services:
         target: revprox_cert
       - source: revprox_key
         target: revprox_key
+
+    depends_on:
+      - simulation_api
+
     networks:
       - front-tier
 
   simulation_api:
-    image:
+    image: chunchunhuang/op_helio_simulation_api:1.0.0
     secrets:
       - MONGO_INITDB_ROOT_USERNAME
       - MONGO_INITDB_ROOT_PASSWORD
