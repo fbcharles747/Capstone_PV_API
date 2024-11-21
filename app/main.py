@@ -21,7 +21,6 @@ from app.models.location import LocationModel
 from app.constant.devices import DEFAULT_INVERTER,DEFAULT_MODULE
 from app.constant.location import DEFAULT_LOCATION
 from typing import Annotated
-import os
 from app.api_adaptor.google_map import GoogleMap_Adaptor
 from app.api_adaptor.open_weather_map import OpenWeather_Adaptor
 from app.api_adaptor.solcast_api import Solcast_Adaptor
