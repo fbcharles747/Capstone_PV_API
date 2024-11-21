@@ -22,7 +22,7 @@ services:
       - simulation_api
 
   simulation_api:
-    image: chunchunhuang/op_helio_simulation_api:1.0.1
+    image: chunchunhuang/op_helio_simulation_api:1.0.2
     secrets:
       - MONGO_INITDB_ROOT_USERNAME
       - MONGO_INITDB_ROOT_PASSWORD
