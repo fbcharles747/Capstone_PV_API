@@ -2,7 +2,7 @@ version: "3.2"
 
 services:
   reverse_proxy:
-    image: chunchunhuang/op_helios_httpserver:1.0.4
+    image: chunchunhuang/op_helios_httpserver:1.0.5
     ports:
       - "80:80"
       - "443:443"
