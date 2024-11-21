@@ -2,7 +2,7 @@ version: "3.2"
 
 services:
   reverse_proxy:
-    image: chunchunhuang/op_helios_httpserver:1.0.2
+    image: chunchunhuang/op_helios_httpserver:1.0.4
     ports:
       - "80:80"
       - "443:443"
@@ -14,9 +14,20 @@ services:
 
     networks:
       - front-tier
+    volumes:
+     - ./nginx.conf:/etc/nginx/proxy.conf:ro
+    deploy:
+      restart_policy:
+        condition: on-failure
+      replicas: 1
+    depends_on:
+      - simulation_api
+
 
   simulation_api:
     image: chunchunhuang/op_helio_simulation_api:1.0.0
+    ports:
+      - 8000:8000
     secrets:
       - MONGO_INITDB_ROOT_USERNAME
       - MONGO_INITDB_ROOT_PASSWORD
@@ -54,21 +65,27 @@ services:
     volumes:
       - mongo_config_db:/data/db
 
+    deploy:
+      replicas: 1
+
     networks:
       - back-tier
 
   elasticsearch:
-    image: chunchunhuang/op_helio_elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.0
     secrets:
       - source: elasticsearch_password
         target: elasticsearch_password
-        mode: 0400
+        mode: 0444
     environment:
-      - ELASTIC_PASSWORD_FILE=/usr/share/elasticsearch/config/elasticsearch_password
+      - ELASTIC_PASSWORD_FILE=/run/secrets/elasticsearch_password
       - discovery.type=single-node
       - xpack.security.enabled=true
     volumes:
       - elasticsearch_simulation_db:/usr/share/elasticsearch/data
+
+    deploy:
+      replicas: 1
 
     networks:
       - back-tier
