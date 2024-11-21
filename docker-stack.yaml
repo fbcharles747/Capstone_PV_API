@@ -12,9 +12,6 @@ services:
       - source: revprox_key
         target: revprox_key
 
-    depends_on:
-      - simulation_api
-
     networks:
       - front-tier
 
@@ -41,11 +38,6 @@ services:
         max_attempts: 3
         window: 120s
 
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
     networks:
       - front-tier
       - back-tier
@@ -59,13 +51,6 @@ services:
       - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/MONGO_INITDB_ROOT_USERNAME
       - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/MONGO_INITDB_ROOT_PASSWORD
 
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 30s
-      start_period: 10s
-      retries: 10
-
     volumes:
       - mongo_config_db:/data/db
 
@@ -76,11 +61,7 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
     secrets:
       - elasticsearch_password
-    healthcheck:
-      test: ["CMD-SHELL", "curl localhost:9200/_cat/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    
     environment:
       - ELASTIC_PASSWORD_FILE=/run/secrets/elasticsearch_password
       - discovery.type=single-node
@@ -126,4 +107,8 @@ secrets:
   solcast_apikey:
     external: true
   test_secret:
+    external: true
+  revprox_cert:
+    external: true
+  revprox_key:
     external: true
