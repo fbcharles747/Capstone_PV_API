@@ -23,8 +23,6 @@ services:
 
   simulation_api:
     image: chunchunhuang/op_helio_simulation_api:1.0.0
-    ports:
-      - 8000:8000
     secrets:
       - MONGO_INITDB_ROOT_USERNAME
       - MONGO_INITDB_ROOT_PASSWORD
@@ -68,24 +66,24 @@ services:
     networks:
       - back-tier
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.0
-    secrets:
-      - source: elasticsearch_password
-        target: elasticsearch_password
-        mode: 0444
-    environment:
-      - ELASTIC_PASSWORD_FILE=/run/secrets/elasticsearch_password
-      - discovery.type=single-node
-      - xpack.security.enabled=true
-    volumes:
-      - elasticsearch_simulation_db:/usr/share/elasticsearch/data
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.16.0
+  #   secrets:
+  #     - source: elasticsearch_password
+  #       target: elasticsearch_password
+  #       mode: 0444
+  #   environment:
+  #     - ELASTIC_PASSWORD_FILE=/run/secrets/elasticsearch_password
+  #     - discovery.type=single-node
+  #     - xpack.security.enabled=true
+  #   volumes:
+  #     - elasticsearch_simulation_db:/usr/share/elasticsearch/data
 
-    deploy:
-      replicas: 1
+  #   deploy:
+  #     replicas: 1
 
-    networks:
-      - back-tier
+  #   networks:
+  #     - back-tier
 
 volumes:
   mongo_config_db:
