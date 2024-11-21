@@ -2,7 +2,7 @@ version: "3.2"
 
 services:
   reverse_proxy:
-    image: chunchunhuang/op_helios_httpserver:latest
+    image: chunchunhuang/op_helios_httpserver:1.0.1
     ports:
       - "80:80"
       - "443:443"
@@ -60,8 +60,9 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
     secrets:
-      - elasticsearch_password
-    
+      - source: elasticsearch_password
+        target: elasticsearch_password
+        mode: 0400
     environment:
       - ELASTIC_PASSWORD_FILE=/run/secrets/elasticsearch_password
       - discovery.type=single-node
