@@ -36,7 +36,7 @@ elastic_pass=get_docker_secret('elasticsearch_password',default='no elastic sear
 secret=get_docker_secret('api_secret')
 mongo_user=get_docker_secret('MONGO_INITDB_ROOT_USERNAME')
 mongodb_password=get_docker_secret('MONGO_INITDB_ROOT_PASSWORD')
-db_uri=f'mongodb://{mongo_user}:{mongodb_password}@mongodb'
+db_uri=f'mongodb://{mongo_user}:{mongodb_password}@mongodb:27017'
 test_secret=get_docker_secret('test_secret')
 print(f'The value of test secret is: {test_secret}')
 elastic_path="http://elasticsearch:9200"
