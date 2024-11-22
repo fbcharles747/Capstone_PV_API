@@ -1,69 +1,70 @@
 version: "3.8"
 
 services:
-  # reverse_proxy:
-  #   image: chunchunhuang/op_helios_httpserver:1.0.5
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   secrets:
-  #     - source: revprox_cert
-  #       target: revprox_cert
-  #     - source: revprox_key
-  #       target: revprox_key
+  reverse_proxy:
+    image: chunchunhuang/op_helios_httpserver:1.0.5
+    ports:
+      - "80:80"
+      - "443:443"
+    secrets:
+      - source: revprox_cert
+        target: revprox_cert
+      - source: revprox_key
+        target: revprox_key
 
-  #   networks:
-  #     - front-tier
-  #   deploy:
-  #     restart_policy:
-  #       condition: on-failure
-  #     replicas: 1
-  #   depends_on:
-  #     - simulation_api
+    networks:
+      - front-tier
+    deploy:
+      restart_policy:
+        condition: on-failure
+      replicas: 1
+    depends_on:
+      - simulation_api
 
-  # simulation_api:
-  #   image: chunchunhuang/op_helio_simulation_api:1.0.3
-  #   secrets:
-  #     - mongo_username
-  #     - mongo_password
-  #     - api_secret
-  #     - elasticsearch_password
-  #     - googlemap_apikey
-  #     - openweather_apikey
-  #     - solcast_apikey
-  #     - test_secret
-  #   deploy:
-  #     replicas: 1
-  #     update_config:
-  #       parallelism: 1
-  #       failure_action: rollback
+  simulation_api:
+    image: chunchunhuang/op_helio_simulation_api:1.1.2
+    secrets:
+      - mongo_username
+      - mongo_password
+      - api_secret
+      - elasticsearch_password
+      - googlemap_apikey
+      - openweather_apikey
+      - solcast_apikey
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        failure_action: rollback
 
-  #     restart_policy:
-  #       condition: on-failure
-  #       delay: 5s
-  #       max_attempts: 3
-  #       window: 120s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
-  #   networks:
-  #     - front-tier
-  #     - back-tier
+    networks:
+      - front-tier
+      - back-tier
 
   mongodb:
     image: mongo
     restart: always
-    ports:
-      - 27017:27017
     secrets:
       - mongo_username
       - mongo_password
-      - user
-      - access
+
+    ports:
+      - 27017:27017
 
     environment:
-      # - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_username
-      # - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_password
-      - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/user
-      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/access
+      - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_username
+      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_password
+
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
 
     volumes:
       - mongo_config_db:/data/db
@@ -71,24 +72,22 @@ services:
     networks:
       - back-tier
 
-  # elasticsearch:
-  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.16.0
-  #   secrets:
-  #     - source: elasticsearch_password
-  #       target: elasticsearch_password
-  #       mode: 0444
-  #   environment:
-  #     - ELASTIC_PASSWORD_FILE=/run/secrets/elasticsearch_password
-  #     - discovery.type=single-node
-  #     - xpack.security.enabled=true
-  #   volumes:
-  #     - elasticsearch_simulation_db:/usr/share/elasticsearch/data
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.0
+    environment:
+      - ELASTIC_PASSWORD=0165r9WA3nq5xvMdsKM
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+    volumes:
+      - elasticsearch_simulation_db:/usr/share/elasticsearch/data
 
-  #   deploy:
-  #     replicas: 1
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
 
-  #   networks:
-  #     - back-tier
+    networks:
+      - back-tier
 
 volumes:
   mongo_config_db:
@@ -124,13 +123,7 @@ secrets:
     external: true
   solcast_apikey:
     external: true
-  test_secret:
-    external: true
   revprox_cert:
     external: true
   revprox_key:
-    external: true
-  user: 
-    external: true
-  access:
     external: true
