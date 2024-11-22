@@ -36,14 +36,15 @@ elastic_pass=get_docker_secret('elasticsearch_password',default='no elastic sear
 secret=get_docker_secret('api_secret')
 mongo_user=get_docker_secret('mongo_username')
 mongodb_password=get_docker_secret('mongo_password')
-print(f'mongo user: {mongo_user}')
-db_uri = f'mongodb://{mongo_user}:{mongodb_password}@mongodb:27017/testDB?authSource=admin&retryWrites=true&w=majority'
-test_secret=get_docker_secret('test_secret')
-print(f'The value of test secret is: {test_secret}')
 elastic_path="http://elasticsearch:9200"
 # database connection
 
-client=MongoClient(db_uri)
+client=MongoClient( host='mongodb',
+                    port=27017,
+                    username=mongo_user, 
+                    password=mongodb_password,
+                    authSource="admin")
+print('host used: mongodb')
 db=client.get_database("testDB")
 gmap_client=Client(key=gmap_apikey)
 
