@@ -9,6 +9,7 @@ class Solcast_Irradiance(BaseModel):
     ghi:float
     dni:float
     dhi:float
+    gti:float
     period_end:datetime|None
 
     def __init__(self,**kwarg):
@@ -19,6 +20,7 @@ class Solcast_Irradiance(BaseModel):
             "ghi":self.ghi,
             "dni":self.dni,
             "dhi":self.dhi,
+            "gti":self.gti,
             "irradiance_timestamp":self.period_end
         }
 
@@ -40,7 +42,7 @@ class Solcast_Adaptor:
                                       "longitude":longitude,
                                       "hours":1,
                                       "format":'json',
-                                      "output_parameters":['dni','ghi','dhi'],
+                                      "output_parameters":['dni','ghi','dhi','gti'],
                                       "period":"PT15M"
                                   })
             response.raise_for_status()
