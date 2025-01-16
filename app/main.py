@@ -84,7 +84,7 @@ module_service=SolarModuleService(
 )
 
 default_system=PVSystemModel(
-    name='default',
+    name='ATCO Barlow Site',
     num_of_array=4,
     array_config=SolarArray()
 )
