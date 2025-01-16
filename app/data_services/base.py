@@ -1,7 +1,6 @@
 from typing import TypeVar,Generic,Any,Dict,Optional
 from pydantic import BaseModel
 from pymongo.database import Database
-from pymongo.results import UpdateResult
 from bson.objectid import ObjectId
 
 T= TypeVar("T",bound=BaseModel)

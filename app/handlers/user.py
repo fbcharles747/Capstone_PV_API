@@ -1,6 +1,5 @@
 from fastapi import FastAPI,Form,HTTPException,status,Depends
-from fastapi.security import OAuth2PasswordBearer
-from typing import Annotated,Optional
+from typing import Annotated
 from app.handlers.base import BaseHandler
 from app.handlers.security import APIKeyHandler,JWTHandler
 from app.data_services.user import UserService
