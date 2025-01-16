@@ -35,7 +35,7 @@ class PVSystemService(BaseService[PVSystemModel]):
         if name is not None:
             field_to_update.update({"name":name})
 
-        if num_of_array >1:
+        if num_of_array >=1:
             field_to_update.update({"num_of_array":num_of_array})
         
         if arrayConfig is not None:
@@ -47,7 +47,7 @@ class PVSystemService(BaseService[PVSystemModel]):
         system=PVSystemModel()
         if name is not None:
             system.name=name
-        if num_of_arrays > 1:
+        if num_of_arrays >= 1:
             system.num_of_array=num_of_arrays
         if arrayConfig is not None:
             system.array_config=arrayConfig
