@@ -24,7 +24,7 @@ DEFAULT_MODULE = {
   "Bifacial": 1,
   "STC": 540.849,
   "PTC": 504.4,
-  "A_c": 2.58,
+  "A_c": 2.6,
   "Length": 2.256,
   "Width": 1.133,
   "N_s": 72,
@@ -45,7 +45,8 @@ DEFAULT_MODULE = {
   "BIPV": "N",
   "Version": "2023.10.31",
   "Date": "11/16/2022",
-  "Name": "VSUN540-144BMH-DG"
+  "Name": "VSUN540-144BMH-DG",
+  "Efficiency": 0.2267
 }
 
 

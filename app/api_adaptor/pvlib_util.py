@@ -105,6 +105,8 @@ def run_model(location:LocationModel,weather:Weather_Data,module:SolarModuleMode
     model_chain=ModelChain(system=pvlib_system,location=pvlib_location,aoi_model='no_loss')
     model_chain.run_model(pvlib_weather)
 
+    print(f"AC power: {model_chain.results.ac}")
+
     result=model_chain.results.dc.reset_index(names='time_stamp').loc[0].to_dict()
 
 

@@ -18,7 +18,7 @@ class ModelResult(BaseModel):
   day_of_month:Annotated[int,Body(description="days of the month")]=datetime.now(tz=timezone.utc).day
   system_ac_power:Annotated[float,Body(description="ac output power of the system in Watt (W)")]=0
   system_dc_power:Annotated[float,Body(description='dc output power of all solar panel in Watt (W)')]=0
-  single_array_status:Annotated[SingleArrayStatus,Body(description="modeling result of single array in a system")]=None
+  # single_array_status:Annotated[SingleArrayStatus,Body(description="modeling result of single array in a system")]=None
 
 class StatsResult(BaseModel):
   count:Annotated[int,Body(description="how many data are collected to calculate the min, max, avg and sum")]
