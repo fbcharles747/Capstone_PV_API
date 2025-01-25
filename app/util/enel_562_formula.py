@@ -8,8 +8,8 @@ from app.api_adaptor.aggregate_data import Weather_Data
 def run_model(module:SolarModuleModel,inverter:InverterModel,system:PVSystemModel,weather:Weather_Data)->ModelResult:
     
     result:ModelResult=ModelResult()
-
-    dc_power:float=module.A_c * module.Efficiency * system.array_config.modules_per_string * system.array_config.strings * system.num_of_array  * weather.ghi
+    single_module_generation:float=min(module.A_c * weather.gti * module.Efficiency,module.STC)
+    dc_power:float= single_module_generation* system.array_config.modules_per_string * system.array_config.strings * system.num_of_array
     # take wire and system loss into account
     ac_power:float=dc_power * (inverter.Efficiency - 0.02717)
     result.system_ac_power=ac_power
