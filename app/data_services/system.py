@@ -108,12 +108,12 @@ class PVSystemService(BaseService[PVSystemModel]):
             filters=filters,
             stats_field={
                 'system_ac_power': 'system_ac_power',
-                'system_dc_power':'system_dc_power',
-                'single_array_p_mp':'single_array_status.p_mp',
-                'single_array_v_mp':'single_array_status.v_mp',
-                'single_array_i_mp':'single_array_status.i_mp',
-                'single_array_i_sc':'single_array_status.i_sc',
-                'single_array_v_oc':'single_array_status.v_oc'
+                'system_dc_power':'system_dc_power'
+                # 'single_array_p_mp':'single_array_status.p_mp',
+                # 'single_array_v_mp':'single_array_status.v_mp',
+                # 'single_array_i_mp':'single_array_status.i_mp',
+                # 'single_array_i_sc':'single_array_status.i_sc',
+                # 'single_array_v_oc':'single_array_status.v_oc'
             }
         )
         results:list[AnalyticResult]=[]
