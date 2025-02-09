@@ -31,8 +31,8 @@ class AnalyticResult(BaseModel):
   time_stamp:datetime=datetime.now(tz=timezone.utc)
   system_ac_power:Annotated[StatsResult,Body(description="statistic result of system AC power")]
   system_dc_power:Annotated[StatsResult,Body(description='statistic result of system DC power')]
-  single_array_p_mp:Annotated[StatsResult,Body(description='statistic result of single array max power')]
-  single_array_v_mp:Annotated[StatsResult,Body(description='statistic result of single array voltage at max power')]
-  single_array_i_mp:Annotated[StatsResult,Body(description='statistic result of single array current at max power')]
-  single_array_i_sc:Annotated[StatsResult,Body(description='statistic result of single array short circuit current')]
-  single_array_v_oc:Annotated[StatsResult,Body(description='statistic result of single array open circuit voltage')]
+  # single_array_p_mp:Annotated[StatsResult,Body(description='statistic result of single array max power')]
+  # single_array_v_mp:Annotated[StatsResult,Body(description='statistic result of single array voltage at max power')]
+  # single_array_i_mp:Annotated[StatsResult,Body(description='statistic result of single array current at max power')]
+  # single_array_i_sc:Annotated[StatsResult,Body(description='statistic result of single array short circuit current')]
+  # single_array_v_oc:Annotated[StatsResult,Body(description='statistic result of single array open circuit voltage')]
