@@ -9,7 +9,9 @@ from app.models.result import ModelResult,AnalyticResult
 from app.api_adaptor.aggregate_data import Weather_Data
 from app.api_adaptor.elastic_search import EsAdaptor
 from app.constant.elastic_search import CalendarInterval
+from app.util import enel_562_formula
 from elasticsearch import Elasticsearch
+
 
 
 
@@ -56,17 +58,23 @@ class PVSystemService(BaseService[PVSystemModel]):
     
     def run_model(self,location:LocationModel,weather:Weather_Data,module:SolarModuleModel,inverter:InverterModel,system:PVSystemModel)->ModelResult:
         
-        single_array_result=pvlib_adaptor.run_model(
-            location=location,
-            weather=weather,
-            module=module,
-            inverter=inverter,
-            system=system
-        )
-        result=ModelResult(single_array_status=single_array_result)
-        result.single_array_status=single_array_result
-        result.system_dc_power=system.num_of_array * single_array_result.p_mp
-        result.system_ac_power=result.system_dc_power * inverter.Efficiency
+        # single_array_result=pvlib_adaptor.run_model(
+        #     location=location,
+        #     weather=weather,
+        #     module=module,
+        #     inverter=inverter,
+        #     system=system
+        # )
+        # result=ModelResult(single_array_status=single_array_result)
+        # result.single_array_status=single_array_result
+        # result.system_dc_power=system.num_of_array * single_array_result.p_mp
+        # result.system_ac_power=result.system_dc_power * inverter.Efficiency
+
+        result:ModelResult = enel_562_formula.run_model(module=module,
+                                                        system=system,
+                                                        weather=weather,
+                                                        inverter=inverter)
+
         result.time_stamp=datetime.now(tz=timezone.utc)
         result.calendar_year=result.time_stamp.year
         result.month=result.time_stamp.month
@@ -100,12 +108,12 @@ class PVSystemService(BaseService[PVSystemModel]):
             filters=filters,
             stats_field={
                 'system_ac_power': 'system_ac_power',
-                'system_dc_power':'system_dc_power',
-                'single_array_p_mp':'single_array_status.p_mp',
-                'single_array_v_mp':'single_array_status.v_mp',
-                'single_array_i_mp':'single_array_status.i_mp',
-                'single_array_i_sc':'single_array_status.i_sc',
-                'single_array_v_oc':'single_array_status.v_oc'
+                'system_dc_power':'system_dc_power'
+                # 'single_array_p_mp':'single_array_status.p_mp',
+                # 'single_array_v_mp':'single_array_status.v_mp',
+                # 'single_array_i_mp':'single_array_status.i_mp',
+                # 'single_array_i_sc':'single_array_status.i_sc',
+                # 'single_array_v_oc':'single_array_status.v_oc'
             }
         )
         results:list[AnalyticResult]=[]

@@ -30,6 +30,7 @@ class SolarModuleModel(BaseModel):
     Version: Annotated[str, Body(description="Version of the module")]='not required'
     Date: Annotated[str, Body(description="Manufacture date of the module")]='not required'
     Name: Annotated[str, Body(description="Name of the solar module")]='not required'
+    Efficiency: Annotated[float, Body(description="Efficiency of the solar module")]
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

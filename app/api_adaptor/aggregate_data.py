@@ -1,4 +1,4 @@
-from pydantic import BaseModel,Field
+from pydantic import BaseModel
 from typing import Annotated
 from datetime import datetime
 from fastapi import Body
@@ -22,6 +22,7 @@ class Weather_Data(BaseModel):
     ghi: Annotated[float, Body(description="Global horizontal irradiance in W/m²")]
     dni: Annotated[float, Body(description="Direct normal irradiance in W/m²")]
     dhi: Annotated[float, Body(description="Diffuse horizontal irradiance in W/m²")]
+    gti: Annotated[float, Body(description="Global tilted irradiance in W/m²")]
     irradiance_timestamp: Annotated[datetime, Body(description="UTC timestamp of the irradiance data")]
 
     def __init__(self,**kwarg):

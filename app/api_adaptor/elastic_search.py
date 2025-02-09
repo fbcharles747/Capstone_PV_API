@@ -1,7 +1,6 @@
 from elasticsearch import Elasticsearch
 from typing import TypeVar,Generic,Union
 from pydantic import BaseModel
-from datetime import datetime
 from app.constant.elastic_search import CalendarInterval
 
 

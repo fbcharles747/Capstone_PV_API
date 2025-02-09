@@ -3,7 +3,6 @@ from app.api_adaptor.google_map import GoogleMap_Adaptor
 from app.api_adaptor.open_weather_map import OpenWeather_Adaptor
 from app.api_adaptor.solcast_api import Solcast_Adaptor
 from app.models.location import LocationModel
-from app.models.user import User
 from app.api_adaptor.aggregate_data import Weather_Data
 from pymongo.database import Database
 
