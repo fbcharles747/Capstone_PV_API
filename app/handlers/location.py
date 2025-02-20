@@ -7,6 +7,7 @@ from app.models.location import LocationModel
 from fastapi import FastAPI,HTTPException,status,Depends
 from typing import Annotated
 from app.api_adaptor.aggregate_data import Weather_Data
+from datetime import datetime,timedelta
 
 class LocationHandler(BaseHandler):
     def __init__(self,data_service:LocationService,
@@ -39,6 +40,8 @@ class LocationHandler(BaseHandler):
                                   user:Annotated[User,Depends(self.oauth_handler.get_current_user)],
                                   name:str="No name"):
             
+            self.__user_service.refresh_location(user_email=user.email)
+
             if user.location_Id is None:
                 locationId=self.__location_service.create_location(latitude=latitude,longitude=longitude,name=name)
                 if locationId is not None:
@@ -57,6 +60,7 @@ class LocationHandler(BaseHandler):
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="location update fail"
                 )
+            
             return "user location is updated"
         
         @self.app.get(f'/configured-location',tags=[self.tag])
@@ -82,6 +86,8 @@ class LocationHandler(BaseHandler):
         )->Weather_Data:
             
             user=get_user(token=token,apikey=apikey)
+            if (user.weather_updatedAt) and (datetime.now() - user.weather_updatedAt < timedelta(minutes=10)):
+                return user.cached.weather
             
             location=self.__location_service.get_location_ById(user.location_Id)
             if location is None:
@@ -95,6 +101,11 @@ class LocationHandler(BaseHandler):
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail='something wrong about weather data'
                 )
+            
+            user.cached.weather=weather
+            user.weather_updatedAt=datetime.now()
+            self.__user_service.update_by_email(user.email,user.model_dump())
+
             return weather
             
             
