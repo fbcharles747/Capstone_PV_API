@@ -12,6 +12,8 @@ from app.models.result import ModelResult,AnalyticResult
 from app.util.handler_return import ResponseModifier,ResponseWithMsg
 from typing import Annotated
 from datetime import datetime
+from app.api_adaptor.aggregate_data import Weather_Data
+from datetime import timedelta
 
 class PVSystemHandler(BaseHandler):
     def __init__(self,
@@ -98,12 +100,26 @@ class PVSystemHandler(BaseHandler):
         )->ResponseWithMsg[ModelResult]:
             user=get_user(token=token,apikey=apikey)
             location=self.__location_service.get_location_ById(user.location_Id)
-            weather=self.__location_service.get_current_weather(latitude=location.latitude,longitude=location.longitude)
+            weather:Weather_Data=None
+            # if user access the live weather 10 minutes ago, and the user location is not updated within the last 10 minutes,return cached
+            if (user.weather_updatedAt) and ((datetime.now() - user.weather_updatedAt) < timedelta(minutes=10)):
+                weather = user.cached.weather
+                print("run model with cached data")
+            else:
+                weather=self.__location_service.get_current_weather(latitude=location.latitude,longitude=location.longitude)
+
             if weather is None:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="not able to get current weather data"
                 )
+            
+            # cached the weather data
+            user.cached.weather=weather
+            user.weather_updatedAt=datetime.now()
+            self.__user_service.update_by_email(user.email,user.model_dump())
+
+            
             inverter=self.__inverter_service.get_inverter_ById(user.inverter_Id)
             module=self.__solarmodule_service.get_solar_module(user.solarModule_Id)
             

@@ -24,7 +24,7 @@ class Weather_Data(BaseModel):
     dhi: Annotated[float, Body(description="Diffuse horizontal irradiance in W/m²")]
     gti: Annotated[float, Body(description="Global tilted irradiance in W/m²")]
     irradiance_timestamp: Annotated[datetime, Body(description="UTC timestamp of the irradiance data")]
-
+    
     def __init__(self,**kwarg):
         super().__init__(**kwarg)
 

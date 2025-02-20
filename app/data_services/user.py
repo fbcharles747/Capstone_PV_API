@@ -5,6 +5,7 @@ from app.models.operation_status import OperationStatus
 from fastapi import status
 from keycove import hash,encrypt,decrypt,generate_token
 from typing import Optional
+from datetime import datetime
 
 class UserService(BaseService[User]):
 
@@ -67,7 +68,15 @@ class UserService(BaseService[User]):
         )
     
     def update_locationId(self,user_email:str,locationId:str)->bool:
-        return self.update_by_email(user_email,{'location_Id':locationId})
+        return self.update_by_email(user_email,{'location_Id':locationId, 'location_updatedAt': datetime.now()})
+    
+    def refresh_location(self, user_email:str)->bool:
+        return self.update_by_email(user_email,{'location_updatedAt': datetime.now()})
+    
+    def refresh_weather(self,user_email:str) -> bool:
+        return self.update_by_email(user_email, {'weather_updatedAt': datetime.now()})
+    
+    
     
     def update_inverterId(self,user_email:str,inverterId:str|None)->bool:
         return self.update_by_email(user_email,{'inverter_Id':inverterId})
@@ -77,6 +86,7 @@ class UserService(BaseService[User]):
     
     def update_systemId(self,user_email:str,systemId:str|None)->bool:
         return self.update_by_email(user_email,{'system_Id':systemId})
+    
     
     def toggle_apikey(self, email:str,enable:bool)->bool:
         return self.update_by_email(email=email,update_dict={"api_key_enable":enable})
