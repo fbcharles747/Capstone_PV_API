@@ -11,7 +11,8 @@ def run_model(module:SolarModuleModel,inverter:InverterModel,system:PVSystemMode
     single_module_generation:float=module.A_c * weather.gti * module.Efficiency
     dc_power:float = single_module_generation* system.array_config.modules_per_string * system.array_config.strings * system.num_of_array
     # take wire and system loss into account
-    ac_power:float=dc_power * (inverter.Efficiency - 0.02717)
+    reasonable_loss:float = 0.05
+    ac_power:float=dc_power * (inverter.Efficiency - 0.02717 - reasonable_loss)
     result.system_ac_power=ac_power
     result.system_dc_power=dc_power
     
