@@ -174,18 +174,15 @@ async def login_for_access_token(
     
     return Token(access_token=access_token, token_type="bearer")
 
-from app.models.user import User
-@app.get("/test")
-async def test_auth(user:Annotated[User,Depends(oauth_handler.get_current_user)]):
-    from app.api_adaptor.elastic_search import EsAdaptor
-    modelResult_adaptor=EsAdaptor(client=es_client)
 
-    return modelResult_adaptor.get_past_24h(index=user.system_Id,timestamp_field="time_stamp")
-    # return modelResult_adaptor.get_timebucket_stats(index=user.system_Id,
-    #                                                 time_stamp_field="time_stamp",
-    #                                                 filters={"calendar_year":2024,"month":11},
-    #                                                 stats_field={"system_ac_stats":"system_ac_power","single_array_power":"single_array_status.p_mp"},
-    #                                                 calendar_interval='hour')
+from app.models.user import User
+from app.util.pvlib_script import Barlow_pvlib_script
+from app.models.result import ModelResult
+@app.get("/Barlow_site_generation")
+async def get_Barlow_power(user:Annotated[User,Depends(oauth_handler.get_current_user)])->ModelResult:
+
+    return Barlow_pvlib_script(solcast_apikey=solcast_apikey)
+    
 
 
 # register pathes of each handler

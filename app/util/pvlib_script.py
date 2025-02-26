@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 from app.models.result import ModelResult
 
-def pvlib_script(solcast_apikey:str) -> ModelResult:
+def Barlow_pvlib_script(solcast_apikey:str) -> ModelResult:
     temperature_model_parameters = TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
 
     #sandia_modules = pvlib.pvsystem.retrieve_sam('SandiaMod')
