@@ -169,15 +169,15 @@ def Barlow_pvlib_script(solcast_apikey:str) -> ModelResult:
     )
     #Inverter 9
     #Maxing out Inverter Clipping
-    system9 = PVSystem(
-        surface_tilt=25,
-        surface_azimuth=180,
-        module_parameters=cec_module,
-        inverter_parameters=cec_inverter,
-        temperature_model_parameters=temperature_model_parameters,
-        modules_per_string=25, strings_per_inverter=308, losses_parameters={'age': 0.5,'soiling' : 1, 'shading' :1, 'mismatch' : 0.25, 'wiring': 1, 'connections' : 0.25, 'lid':0.5, 'nameplate_rating' : 0, 'availability':0}
+    # system9 = PVSystem(
+    #     surface_tilt=25,
+    #     surface_azimuth=180,
+    #     module_parameters=cec_module,
+    #     inverter_parameters=cec_inverter,
+    #     temperature_model_parameters=temperature_model_parameters,
+    #     modules_per_string=25, strings_per_inverter=308, losses_parameters={'age': 0.5,'soiling' : 1, 'shading' :1, 'mismatch' : 0.25, 'wiring': 1, 'connections' : 0.25, 'lid':0.5, 'nameplate_rating' : 0, 'availability':0}
 
-    )
+    # )
     #Inverter 0
     mc = ModelChain(system, location, aoi_model="physical",spectral_model="no_loss", losses_model="pvwatts")
     #Inverter 1
@@ -196,8 +196,8 @@ def Barlow_pvlib_script(solcast_apikey:str) -> ModelResult:
     mc7 = ModelChain(system7, location, aoi_model="physical",spectral_model="no_loss", losses_model="pvwatts")
     #Inverter 8
     mc8 = ModelChain(system8, location, aoi_model="physical",spectral_model="no_loss", losses_model="pvwatts")
-    #Inverter 9
-    mc9 = ModelChain(system9, location, aoi_model="physical",spectral_model="no_loss",losses_model="pvwatts")
+    # #Inverter 9
+    # mc9 = ModelChain(system9, location, aoi_model="physical",spectral_model="no_loss",losses_model="pvwatts")
 
 
     solcast_resp = live.radiation_and_weather(
@@ -236,10 +236,8 @@ def Barlow_pvlib_script(solcast_apikey:str) -> ModelResult:
     mc7.run_model(solcast_weather)
     #Inverter 8
     mc8.run_model(solcast_weather)
-    #Inverter 9 Not Part of Barlow
-    mc9.run_model(solcast_weather)
 
-    system_ac_power:float=mc1.results.ac.iloc[-1] + mc2.results.ac.iloc[-1]+mc3.results.ac.iloc[-1]+ mc4.results.ac.iloc[-1]+ mc5.results.ac.iloc[-1]+ mc6.results.ac.iloc[-1]+ mc7.results.ac.iloc[-1]+ mc8.results.ac.iloc[-1]+mc9.results.ac.iloc[-1]
+    system_ac_power:float=mc.results.ac.iloc[-1]+mc1.results.ac.iloc[-1] + mc2.results.ac.iloc[-1]+mc3.results.ac.iloc[-1]+ mc4.results.ac.iloc[-1]+ mc5.results.ac.iloc[-1]+ mc6.results.ac.iloc[-1]+ mc7.results.ac.iloc[-1]+ mc8.results.ac.iloc[-1]
     result:ModelResult=ModelResult()
     result.system_ac_power=system_ac_power
     result.system_dc_power=0
