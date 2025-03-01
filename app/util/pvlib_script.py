@@ -237,9 +237,12 @@ def Barlow_pvlib_script(solcast_apikey:str) -> ModelResult:
     #Inverter 8
     mc8.run_model(solcast_weather)
 
-    system_ac_power:float=mc.results.ac.iloc[-1]+mc1.results.ac.iloc[-1] + mc2.results.ac.iloc[-1]+mc3.results.ac.iloc[-1]+ mc4.results.ac.iloc[-1]+ mc5.results.ac.iloc[-1]+ mc6.results.ac.iloc[-1]+ mc7.results.ac.iloc[-1]+ mc8.results.ac.iloc[-1]
+    total_ac_power = pd.Series(
+        data=(mc.results.ac+mc1.results.ac + mc2.results.ac + mc3.results.ac+mc4.results.ac+mc5.results.ac+mc6.results.ac+mc7.results.ac+mc8.results.ac).values,
+        index=mc1.results.ac.index
+    ) 
     result:ModelResult=ModelResult()
-    result.system_ac_power=system_ac_power
+    result.system_ac_power=total_ac_power.iloc[0]
     result.system_dc_power=0
     result.time_stamp=datetime.now(tz=timezone.utc)
     result.calendar_year=result.time_stamp.year
