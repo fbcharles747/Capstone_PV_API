@@ -10,10 +10,12 @@ from app.models.user import User
 from app.models.system import PVSystemModel,SolarArray
 from app.models.result import ModelResult,AnalyticResult
 from app.util.handler_return import ResponseModifier,ResponseWithMsg
+from app.util import real_performance
 from typing import Annotated
 from datetime import datetime
 from app.api_adaptor.aggregate_data import Weather_Data
 from datetime import timedelta
+
 
 class PVSystemHandler(BaseHandler):
     def __init__(self,
@@ -138,14 +140,67 @@ class PVSystemHandler(BaseHandler):
                 return self.__resp_modifier.craft_with_msg(msg="You have not configure the system yet. Configure the system to store modelling result",
                                                              document=result)
             
-            created=self.__system_service.store_result(system_id=user.system_Id,result=result)
+            created=self.__system_service.store_result(system_id=f"{user.system_Id}-estimate",result=result)
             if not created:
                 return self.__resp_modifier.craft_with_msg(msg="fail to record the result",document=result)
             
 
             return self.__resp_modifier.craft_with_msg(msg="the result is recorded",inserted=True,document=result)
         
-        @self.app.get("/system_performance/live",tags=["Analytics"])
+        @self.app.get(f'{self.route}/real_performance',tags=[self.tag])
+        async def get_realtime_performance(
+            token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
+            apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)]
+        )->ResponseWithMsg[ModelResult]:
+            user=get_user(token=token,apikey=apikey)
+            location=self.__location_service.get_location_ById(user.location_Id)
+            weather:Weather_Data=None
+            # if user access the live weather 10 minutes ago, and the user location is not updated within the last 10 minutes,return cached
+            if (user.weather_updatedAt) and ((datetime.now() - user.weather_updatedAt) < timedelta(minutes=10)):
+                weather = user.cached.weather
+                print("run model with cached data")
+            else:
+                weather=self.__location_service.get_current_weather(latitude=location.latitude,longitude=location.longitude)
+
+            if weather is None:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="not able to get current weather data"
+                )
+            
+            # cached the weather data
+            user.cached.weather=weather
+            user.weather_updatedAt=datetime.now()
+            self.__user_service.update_by_email(user.email,user.model_dump())
+
+            
+            inverter=self.__inverter_service.get_inverter_ById(user.inverter_Id)
+            module=self.__solarmodule_service.get_solar_module(user.solarModule_Id)
+            
+            system=self.__system_service.get_pv_system(user.system_Id)
+
+            result=self.__system_service.run_model(
+                location=location,
+                weather=weather,
+                module=module,
+                inverter=inverter,
+                system=system
+            )
+
+            result=real_performance.estimate_real_performance(result,weather)
+            
+            if user.system_Id is None:
+                return self.__resp_modifier.craft_with_msg(msg="You have not configure the system yet. Configure the system to store modelling result",
+                                                             document=result)
+            
+            created=self.__system_service.store_result(system_id=f"{user.system_Id}-real",result=result)
+            if not created:
+                return self.__resp_modifier.craft_with_msg(msg="fail to record the result",document=result)
+            
+
+            return self.__resp_modifier.craft_with_msg(msg="the result is recorded",inserted=True,document=result)
+        
+        @self.app.get("/system_performance/estimate/live",tags=["Analytics"])
         async def get_performance_live(
             token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
             apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)]
@@ -156,9 +211,9 @@ class PVSystemHandler(BaseHandler):
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="user has not yet configure the system"
                 )
-            return self.__system_service.get_live_performance(system_id=user.system_Id)
+            return self.__system_service.get_live_performance(system_id=f"{user.system_Id}-estimate")
         
-        @self.app.get("/system_performance/historical",tags=["Analytics"])
+        @self.app.get("/system_performance/estimate/historical",tags=["Analytics"])
         async def get_performance_historical(
             token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
             apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)],
@@ -172,7 +227,39 @@ class PVSystemHandler(BaseHandler):
                     detail="user has not yet configure the system"
                 )
             return self.__system_service.get_longterm_analysis(
-                system_id=user.system_Id,
+                system_id=f"{user.system_Id}-estimate",
+                calendar_year=calendar_year,
+                month=month
+            )
+        
+        @self.app.get("/system_performance/real/live",tags=["Analytics"])
+        async def get_real_performance_live(
+            token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
+            apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)]
+            )->list[ModelResult]:
+            user=get_user(token=token,apikey=apikey)
+            if user.system_Id is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="user has not yet configure the system"
+                )
+            return self.__system_service.get_live_performance(system_id=f"{user.system_Id}-real")
+        
+        @self.app.get("/system_performance/real/historical",tags=["Analytics"])
+        async def get_performance_historical(
+            token: Annotated[str | None, Depends(self.oauth_handler.token_from_request)],
+            apikey: Annotated[str | None, Depends(self.apikey_handler.apikey_from_request)],
+            calendar_year:int=Query(datetime.now().year,gt=0),
+            month:int=Query(None,ge=1,le=12)
+            )->list[AnalyticResult]:
+            user=get_user(token=token,apikey=apikey)
+            if user.system_Id is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="user has not yet configure the system"
+                )
+            return self.__system_service.get_longterm_analysis(
+                system_id=f"{user.system_Id}-real",
                 calendar_year=calendar_year,
                 month=month
             )
