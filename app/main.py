@@ -28,26 +28,25 @@ from app.api_adaptor.solcast_api import Solcast_Adaptor
 from app.api_adaptor.elastic_search import EsAdaptor
 from app.constant.mongo_collection import Collections
 from elasticsearch import Elasticsearch
+from get_docker_secret import get_docker_secret
 
-# these are secret, need to be taken out in production
-# secret='Gkq3b7z8J9k8L1k9J8k3L1k9J8k3L1k9J8k3L1k9J8k='
-# gmap_apikey='AIzaSyBF2slAi7qpMnjPkcsqkQ0R59rYN9sOnNA'
-# opweather_apikey='8bcf71b09bb730ee178c4d36c09206c1'
-# db_uri="mongodb://user:pass@localhost:27017/"
 oauth2Scheme=OAuth2PasswordBearer(tokenUrl="token")
-# uncoment this line when running in container environment
-db_uri=os.getenv("CONNECTION_STR")
-gmap_apikey=os.getenv("GOOGLEMAP_APIKEY")
-opweather_apikey=os.getenv("OPENWEATHER_APIKEY")
-solcast_apikey=os.getenv("SOLCAST_APIKEY")
-secret=os.getenv("SECRET_KEY")
-elastic_pass=os.getenv("ELASTIC_PASSWORD")
-cert_fingerprint=os.getenv("CERT_FINGERPRINT")
+gmap_apikey=get_docker_secret('googlemap_apikey',default="no google map apikey")
+opweather_apikey=get_docker_secret('openweather_apikey',default='cannot get openweather apikey')
+solcast_apikey=get_docker_secret('solcast_apikey',default='no solcast apikey')
+elastic_pass=get_docker_secret('elasticsearch_password',default='no elastic search password')
+secret=get_docker_secret('api_secret')
+mongo_user=get_docker_secret('mongo_username')
+mongodb_password=get_docker_secret('mongo_password')
 elastic_path="http://elasticsearch:9200"
 # database connection
 
-client=MongoClient(db_uri)
-db=client.get_database("testDB")
+client=MongoClient( host='mongodb',
+                    port=27017,
+                    username=mongo_user, 
+                    password=mongodb_password,
+                    authSource="admin")
+db=client.get_database("siteConfigDB")
 gmap_client=Client(key=gmap_apikey)
 
 es_client=Elasticsearch(
