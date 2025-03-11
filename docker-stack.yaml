@@ -1,0 +1,129 @@
+version: "3.8"
+
+services:
+  reverse_proxy:
+    image: chunchunhuang/op_helios_httpserver:1.0.5
+    ports:
+      - "80:80"
+      - "443:443"
+    secrets:
+      - source: revprox_cert
+        target: revprox_cert
+      - source: revprox_key
+        target: revprox_key
+
+    networks:
+      - front-tier
+    deploy:
+      restart_policy:
+        condition: on-failure
+      replicas: 1
+    depends_on:
+      - simulation_api
+
+  simulation_api:
+    image: chunchunhuang/op_helio_simulation_api:1.1.2
+    secrets:
+      - mongo_username
+      - mongo_password
+      - api_secret
+      - elasticsearch_password
+      - googlemap_apikey
+      - openweather_apikey
+      - solcast_apikey
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        failure_action: rollback
+
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+    networks:
+      - front-tier
+      - back-tier
+
+  mongodb:
+    image: mongo
+    restart: always
+    secrets:
+      - mongo_username
+      - mongo_password
+
+    ports:
+      - 27017:27017
+
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_username
+      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_password
+
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
+
+    volumes:
+      - mongo_config_db:/data/db
+
+    networks:
+      - back-tier
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.0
+    environment:
+      - ELASTIC_PASSWORD=<changeme>
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+    volumes:
+      - elasticsearch_simulation_db:/usr/share/elasticsearch/data
+
+    deploy:
+      placement:
+        constraints:
+          - "node.role == manager"
+
+    networks:
+      - back-tier
+
+volumes:
+  mongo_config_db:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=fs-038c1a3bfa3309477.efs.us-east-2.amazonaws.com,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2
+      device: "fs-038c1a3bfa3309477.efs.us-east-2.amazonaws.com:/capstone_mongo_persist"
+
+  elasticsearch_simulation_db:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=fs-038c1a3bfa3309477.efs.us-east-2.amazonaws.com,nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2
+      device: "fs-038c1a3bfa3309477.efs.us-east-2.amazonaws.com:/capstone_elasticsearch_persist"
+
+networks:
+  front-tier:
+  back-tier:
+
+secrets:
+  mongo_username:
+    external: true
+  mongo_password:
+    external: true
+  api_secret:
+    external: true
+  elasticsearch_password:
+    external: true
+  googlemap_apikey:
+    external: true
+  openweather_apikey:
+    external: true
+  solcast_apikey:
+    external: true
+  revprox_cert:
+    external: true
+  revprox_key:
+    external: true
