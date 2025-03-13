@@ -1,6 +1,15 @@
 version: "3.8"
 
 services:
+
+  dashboard:
+    image: op_helios_dashboard:0.0.1
+    environment:
+      - REACT_APP_API_URL=http://simulation_api:8000
+    networks:
+      - front-tier
+    
+
   reverse_proxy:
     image: chunchunhuang/op_helios_httpserver:1.0.5
     ports:
@@ -53,9 +62,6 @@ services:
     secrets:
       - mongo_username
       - mongo_password
-
-    ports:
-      - 27017:27017
 
     environment:
       - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_username
