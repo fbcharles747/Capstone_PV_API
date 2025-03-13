@@ -8,6 +8,8 @@ services:
       - REACT_APP_API_URL=http://simulation_api:8000
     networks:
       - front-tier
+    depends_on:
+      - simulation_api
     
 
   reverse_proxy:
