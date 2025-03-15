@@ -47,8 +47,7 @@ class EsAdaptor(Generic[T]):
             query={
             "range":{
                 timestamp_field:{
-                    "gte":"now-24h/h",
-                    "lte":"now/h"
+                    "gte":"now-24h/h"
                 }
             }
         },sort=[{timestamp_field:{"order":'asc'}}])
