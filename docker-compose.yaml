@@ -2,7 +2,7 @@ version: "3.0"
 
 services:
   dashboard:
-    image: chunchunhuang/op_helios_dashboard:march_production
+    image: chunchunhuang/op_helios_dashboard:march_production_2
     ports:
       - "3000:3000"
     environment:
