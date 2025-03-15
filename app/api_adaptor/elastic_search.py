@@ -44,6 +44,7 @@ class EsAdaptor(Generic[T]):
 
         resp:dict=self.__client.search(
             index=index,
+            size=10000,
             query={
             "range":{
                 timestamp_field:{
@@ -72,6 +73,7 @@ class EsAdaptor(Generic[T]):
 
         resp=self.__client.search(
             index=index,
+            size=10000,
             query={
                 "bool":{
                     "must":matches
