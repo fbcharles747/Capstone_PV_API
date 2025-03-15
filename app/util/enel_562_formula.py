@@ -15,7 +15,7 @@ def run_model(module:SolarModuleModel,inverter:InverterModel,system:PVSystemMode
         system.array_config.strings *
         system.num_of_array
     )
-    ac_power:float=dc_power * (inverter.Efficiency - 0.02717)
+    ac_power:float=dc_power * (inverter.Efficiency - 0.02)
     result.system_ac_power=ac_power
     result.system_dc_power=dc_power
     
