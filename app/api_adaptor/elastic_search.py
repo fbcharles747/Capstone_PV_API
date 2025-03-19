@@ -25,7 +25,7 @@ class EsAdaptor(Generic[T]):
         
         resp=self.__client.search(
             index=index,
-            size=1000,
+            size=10000,
             query={
                 "bool":{
                     "must":matches
