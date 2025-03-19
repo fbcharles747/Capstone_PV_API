@@ -9,8 +9,13 @@ def run_model(module:SolarModuleModel,inverter:InverterModel,system:PVSystemMode
     
     result:ModelResult=ModelResult()
     single_module_generation:float=module.A_c * weather.gti * module.Efficiency
-    dc_power:float = single_module_generation* system.array_config.modules_per_string * system.array_config.strings * system.num_of_array
-    ac_power:float=dc_power * (inverter.Efficiency - 0.02717)
+    dc_power: float = (
+        single_module_generation *
+        system.array_config.modules_per_string *
+        system.array_config.strings *
+        system.num_of_array
+    )
+    ac_power:float=dc_power * (inverter.Efficiency - 0.02)
     result.system_ac_power=ac_power
     result.system_dc_power=dc_power
     

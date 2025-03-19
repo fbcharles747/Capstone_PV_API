@@ -44,11 +44,11 @@ class EsAdaptor(Generic[T]):
 
         resp:dict=self.__client.search(
             index=index,
+            size=10000,
             query={
             "range":{
                 timestamp_field:{
-                    "gte":"now-24h/h",
-                    "lte":"now/h"
+                    "gte":"now-24h/h"
                 }
             }
         },sort=[{timestamp_field:{"order":'asc'}}])
@@ -73,6 +73,7 @@ class EsAdaptor(Generic[T]):
 
         resp=self.__client.search(
             index=index,
+            size=10000,
             query={
                 "bool":{
                     "must":matches
