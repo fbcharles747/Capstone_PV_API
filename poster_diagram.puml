@@ -1,0 +1,24 @@
+@startuml software_poster
+
+cloud API_cluster{
+    database ElasticSearch
+    database MongoDB
+    component "Site performance API"
+    
+    "Site performance API" -left-> ElasticSearch : expected and real power generation
+    "Site performance API" -down-> MongoDB  : site configuration data
+
+    component Nginx_server{
+        port 443
+    }
+
+    Nginx_server -left-> "Site performance API" 
+
+    port https
+
+    https --> 443
+}
+
+component Client_dashboard
+
+Client_dashboard --> https
