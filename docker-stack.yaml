@@ -2,16 +2,6 @@ version: "3.8"
 
 services:
 
-  dashboard:
-    image: op_helios_dashboard:0.0.1
-    environment:
-      - REACT_APP_API_URL=http://simulation_api:8000
-    networks:
-      - front-tier
-    depends_on:
-      - simulation_api
-    
-
   reverse_proxy:
     image: chunchunhuang/op_helios_httpserver:1.0.5
     ports:
