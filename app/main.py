@@ -101,7 +101,7 @@ apikey_handler=APIKeyHandler(user_data_service)
 oauth_handler=JWTHandler(user_data_service=user_data_service,
                          secret=secret,
                          algorithm="HS256",
-                         expiry_delta=15)
+                         expiry_delta=180)
 
 api_description:str=""
 
