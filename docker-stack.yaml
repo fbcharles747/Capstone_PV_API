@@ -3,7 +3,7 @@ version: "3.8"
 services:
 
   reverse_proxy:
-    image: chunchunhuang/op_helios_httpserver:1.0.5
+    image: chunchunhuang/op_helios_httpserver:capstone_api
     ports:
       - "80:80"
       - "443:443"
@@ -23,7 +23,7 @@ services:
       - simulation_api
 
   simulation_api:
-    image: chunchunhuang/op_helio_simulation_api:1.1.2
+    image: chunchunhuang/op_helio_simulation_api:capstone
     secrets:
       - mongo_username
       - mongo_password
