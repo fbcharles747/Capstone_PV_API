@@ -8,6 +8,8 @@ from app.api_adaptor.aggregate_data import Weather_Data
 def run_model(module:SolarModuleModel,inverter:InverterModel,system:PVSystemModel,weather:Weather_Data)->ModelResult:
     
     result:ModelResult=ModelResult()
+    ac_limit:float=inverter.Paco * system.num_of_array
+
     single_module_generation:float=module.A_c * weather.gti * module.Efficiency
     dc_power: float = (
         single_module_generation *
@@ -16,7 +18,7 @@ def run_model(module:SolarModuleModel,inverter:InverterModel,system:PVSystemMode
         system.num_of_array
     )
     ac_power:float=dc_power * (inverter.Efficiency - 0.02)
-    result.system_ac_power=ac_power
+    result.system_ac_power=ac_power if ac_power <= ac_limit else ac_limit
     result.system_dc_power=dc_power
     
     return result
